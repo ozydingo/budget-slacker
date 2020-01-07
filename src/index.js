@@ -24,17 +24,17 @@ function handleSpend(body) {
 
   if (!ok) { return { status: 400, response: "Invalid command format." }; }
 
-  const { amount, category } = data;
-  const conf = `Amount: ${amount}\nCategory: ${category}`;
+  const { amount, category, note } = data;
+  const conf = `Amount: ${amount}\nCategory: ${category}\nNote: ${note}`;
   console.log(conf);
 
   return {status: 200, response: conf};
 }
 
 function parseSpend(text) {
-  const pattern = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+)/;
+  const pattern = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))?$/;
   const match = text.match(pattern);
   if (!match) { return {ok: false} };
-  const [,amount,category] = text.match(pattern);
-  return {ok: true, data: {amount, category}};
+  const [, amount, category, note] = text.match(pattern);
+  return {ok: true, data: {amount, category, note}};
 }

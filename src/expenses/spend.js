@@ -5,7 +5,6 @@ const Slack = require("./slack");
 const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))?$/;
 const { client_id, client_secret } = process.env;
 const app_credentials = { client_id, client_secret };
-// TODO: store access and refresh tokens in db instead of env
 
 async function handleSpend(body) {
   const { response_url, team_id, text, user_name, user_id } = body;
@@ -15,7 +14,8 @@ async function handleSpend(body) {
   console.log("Spend data:", spendData);
   const { amount, category, note } = spendData;
   const conf = `Amount: ${amount}\nCategory: ${category}\nNote: ${note}`;
-  const confirmation = Slack.respond(response_url, conf);
+  // Don't have to wait, but it makes it simpler.
+  await Slack.respond(response_url, conf);
 
   const budget = await Budget.find(team_id);
   if (!budget) { return { ok: false, message: "Unfortunately, I can't find this workspace's buduget." }; }
@@ -27,7 +27,6 @@ async function handleSpend(body) {
   if (!spreadsheet_id) { return { ok: false, message: "spreadsheet_id is missing from this workspace!" }; }
   console.log("Spreadsheet:", spreadsheet_id);
 
-
   const token_credentials = { access_token, refresh_token };
   const sheets = new Sheets(app_credentials, token_credentials);
 
@@ -37,7 +36,6 @@ async function handleSpend(body) {
   );
   console.log("Result of row append:", appendResult);
 
-  await confirmation;
   return {ok: true, message: conf};
 }
 

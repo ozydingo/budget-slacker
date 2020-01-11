@@ -1,10 +1,10 @@
 const axios = require("axios");
 
-function respond(response_url, text) {
+function respond({ response_type = "ephemeral", response_url, text }) {
   axios({
     method: "POST",
     url: response_url,
-    data: { text },
+    data: { response_type, text },
   });
 }
 

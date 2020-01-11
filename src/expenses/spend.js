@@ -2,7 +2,7 @@ const Budget = require("./budgets");
 const { Sheets } = require("./sheets");
 const Slack = require("./slack");
 
-const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))?$/;
+const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
 const { client_id, client_secret } = process.env;
 const app_credentials = { client_id, client_secret };
 
@@ -13,9 +13,9 @@ async function handleSpend(body) {
   if (!ok) { return { ok: false, message: "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\"" }; }
   console.log("Spend data:", spendData);
   const { amount, category, note } = spendData;
-  const conf = `Amount: ${amount}\nCategory: ${category}\nNote: ${note}`;
+  const conf = `Got it! You spent ${amount} on the category ${category}, with a note: ${note}`;
   // Don't have to wait, but it makes it simpler.
-  await Slack.respond(response_url, conf);
+  await Slack.respond({ response_url, text: conf });
 
   const budget = await Budget.find(team_id);
   if (!budget) { return { ok: false, message: "Unfortunately, I can't find this workspace's buduget." }; }

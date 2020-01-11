@@ -1,19 +1,22 @@
 const {google} = require("googleapis");
 
+const MTD_FORMULA = "=sum(filter(D2:D, month(A2:A) = month(A2)))";
+
 const headers = [
   "timestamp",
   "user_id",
   "user_name",
   "amount",
   "category",
-  "note"
+  "note",
+  "MTD",
 ];
 
 function epochToDatetime(timestamp) {
   const month = timestamp.getMonth() + 1;
   const date = timestamp.getDate();
   const year = timestamp.getYear();
-  const hour = timestamp.getHouurs();
+  const hour = timestamp.getHours();
   const minute = timestamp.getMinutes();
   const second =  timestamp.getSeconds();
   return  `${month}/${date}/${year} ${hour}:${minute}:${second}`;
@@ -70,6 +73,7 @@ class Sheets {
       amount,
       category,
       note,
+      MTD_FORMULA,
     ];
 
     return this.addRow(spreadsheetId, values);

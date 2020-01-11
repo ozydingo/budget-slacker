@@ -16,6 +16,7 @@ exports.main = async (req, res) => {
     res.status(417).send("Who are you?");
     return;
   }
+  res.status(200).send("");
 
   let ok;
   let message;
@@ -25,7 +26,5 @@ exports.main = async (req, res) => {
   } else {
     ({ ok, message} = {ok: false, message: `Command ${command} not recognized` });
   }
-
-  const status = ok ? 200 : 400;
-  res.status(status).send(message);
+  console.log({ ok, message });
 };

@@ -1,6 +1,8 @@
 const Spend = require("./spend");
 
-const SPREADSHEET_ID = process.env.spreadsheet_id || "1U-QJOVqqDV0fYxpLYQPp_opq-Vlh78pMcEsXlgvDT4k";
+function verifyToken(token) {
+  return token === process.env.app_token;
+}
 
 // Main event function handler
 exports.main = async (req, res) => {
@@ -8,8 +10,8 @@ exports.main = async (req, res) => {
   console.log("Body", body);
   console.log("Query", query);
 
-  const { token, command } = body;
-  if (token !== process.env.app_token) {
+  const { command, token } = body;
+  if (!verifyToken(token)) {
     console.log("Unrecognized app token:", token);
     res.status(417).send("Who are you?");
     return;
@@ -19,7 +21,7 @@ exports.main = async (req, res) => {
   let message;
 
   if (command === "/spend") {
-    ({ ok, message } = await Spend.handleSpend(body, SPREADSHEET_ID));
+    ({ ok, message } = await Spend.handleSpend(body));
   } else {
     ({ ok, message} = {ok: false, message: `Command ${command} not recognized` });
   }

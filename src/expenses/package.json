@@ -2,7 +2,8 @@
   "name": "budget-slacker",
   "version": "0.0.1",
   "dependencies": {
-    "googleapis": "^39.2.0"
+    "googleapis": "^39.2.0",
+    "@google-cloud/firestore": "^2.4.0"
   },
   "devDependencies": {
     "eslint": "^6.5.1",
@@ -16,6 +17,7 @@
     ]
   },
   "scripts": {
+    "dev": "export GOOGLE_APPLICATION_CREDENTIALS=$HOME/etc/budget-slacker-0afb0999d179.json",
     "lint": "./node_modules/.bin/eslint . ;:",
     "test": "jest; :"
   }

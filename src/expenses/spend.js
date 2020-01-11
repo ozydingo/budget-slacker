@@ -3,6 +3,7 @@ const { Sheets } = require("./sheets");
 const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))?$/;
 const { client_id, client_secret, access_token, refresh_token } = process.env;
 const app_credentials = { client_id, client_secret };
+// TODO: store access and refresh tokens in db instead of env
 const token_credentials = { access_token, refresh_token };
 
 async function handleSpend(body, spreadsheetId) {

@@ -13,11 +13,10 @@ class Sheets {
   constructor(app_credentials, token_data) {
     this.app_credentials = app_credentials;
     this.token_data = token_data;
-    const { client_id, client_secret, redirect_uris } = app_credentials;
+    const { client_id, client_secret } = app_credentials;
     this.client = new google.auth.OAuth2(
       client_id,
       client_secret,
-      redirect_uris[0]
     );
     this.client.setCredentials(token_data);
     this.sheets = google.sheets({version: "v4", auth: this.client});

@@ -1,4 +1,4 @@
-const {google} = require('googleapis');
+const {google} = require("googleapis");
 
 const headers = [
   "timestamp",
@@ -7,7 +7,7 @@ const headers = [
   "amount",
   "category",
   "note"
-]
+];
 
 class Sheets {
   constructor(app_credentials, token_data) {
@@ -20,11 +20,11 @@ class Sheets {
       redirect_uris[0]
     );
     this.client.setCredentials(token_data);
-    this.sheets = google.sheets({version: 'v4', auth: this.client});
+    this.sheets = google.sheets({version: "v4", auth: this.client});
   }
 
   async createSpreadsheet() {
-    const sheets = google.sheets({version: 'v4', auth: this.client});
+    const sheets = google.sheets({version: "v4", auth: this.client});
     const resource = {
       properties: {
         title: "Budget Slacker",
@@ -32,12 +32,13 @@ class Sheets {
     };
     const spreadsheet = await sheets.spreadsheets.create({
       resource,
-      fields: 'spreadsheetId',
+      fields: "spreadsheetId",
     });
 
     const spreadsheetId = spreadsheet.data.spreadsheetId;
 
-    const result = await this.addRow(spreadsheetId, headers)
+    const result = await this.addRow(spreadsheetId, headers);
+    console.log("createSpreadsheet result:", result);
     return spreadsheetId;
   }
 
@@ -67,7 +68,7 @@ class Sheets {
     return this.sheets.spreadsheets.values.append({
       spreadsheetId,
       range: "Sheet1!A1:F1",
-      valueInputOption: 'USER_ENTERED',
+      valueInputOption: "USER_ENTERED",
       requestBody: { values: [values] },
     });
   }
@@ -75,4 +76,4 @@ class Sheets {
 
 module.exports = {
   Sheets
-}
+};

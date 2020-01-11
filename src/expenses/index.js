@@ -1,6 +1,6 @@
 const Spend = require("./spend");
 
-const SPREADSHEET_ID = "1U-QJOVqqDV0fYxpLYQPp_opq-Vlh78pMcEsXlgvDT4k";
+const SPREADSHEET_ID = process.env.spreadsheet_id || "1U-QJOVqqDV0fYxpLYQPp_opq-Vlh78pMcEsXlgvDT4k";
 
 // Main event function handler
 exports.main = async (req, res) => {

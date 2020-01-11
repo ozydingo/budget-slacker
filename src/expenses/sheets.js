@@ -9,6 +9,16 @@ const headers = [
   "note"
 ];
 
+function epochToDatetime(timestamp) {
+  const month = timestamp.getMonth() + 1;
+  const date = timestamp.getDate();
+  const year = timestamp.getYear();
+  const hour = timestamp.getHouurs();
+  const minute = timestamp.getMinutes();
+  const second =  timestamp.getSeconds();
+  return  `${month}/${date}/${year} ${hour}:${minute}:${second}`;
+}
+
 class Sheets {
   constructor(app_credentials, token_data) {
     this.app_credentials = app_credentials;
@@ -51,8 +61,10 @@ class Sheets {
       note
     } = data;
 
+    const datetime = epochToDatetime(timestamp);
+
     const values = [
-      timestamp,
+      datetime,
       user_id,
       user_name,
       amount,

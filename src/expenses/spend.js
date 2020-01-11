@@ -9,7 +9,7 @@ const app_credentials = { client_id, client_secret };
 async function handleSpend(body) {
   const promises = [];
   const { response_url, team_id, text, user_name, user_id } = body;
-  const timestamp = (new Date()).getTime();
+  const timestamp = new Date();
   const { ok, spendData } = parseSpend(text);
   if (!ok) {
     await Promise.all(promises);
@@ -51,7 +51,7 @@ async function handleSpend(body) {
 
   const appendResult = await sheets.addSpend(
     spreadsheet_id,
-    { timestamp, user_id, user_name, amount,  category, note }
+    { timestamp, user_id, user_name, amount, category, note }
   );
   console.log("Result of row append:", appendResult);
 

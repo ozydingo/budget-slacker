@@ -54,7 +54,7 @@ class Sheets {
     return spreadsheetId;
   }
 
-  addSpend(spreadsheetId, data) {
+  async addSpend(spreadsheetId, data) {
     const {
       timestamp,
       user_id,
@@ -76,7 +76,16 @@ class Sheets {
       MTD_FORMULA,
     ];
 
-    return this.addRow(spreadsheetId, values);
+    const response = await this.addRow(spreadsheetId, values);
+    const range = response.data.updates.updatedRange;
+
+    const result = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+    const total = result.data.values[0][6];
+
+    return total;
   }
 
   addRow(spreadsheetId, values) {

@@ -49,11 +49,14 @@ async function handleSpend(body) {
   const token_credentials = { access_token, refresh_token };
   const sheets = new Sheets(app_credentials, token_credentials);
 
-  const appendResult = await sheets.addSpend(
+  const total = await sheets.addSpend(
     spreadsheet_id,
     { timestamp, user_id, user_name, amount, category, note }
   );
-  console.log("Result of row append:", appendResult);
+  const resultMessage = `You've spent ${total} so far this month on ${category}`;
+  promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
+    console.log("Result response:", response);
+  }));
 
   await Promise.all(promises);
   return {ok: true, message: confirmationMessage};

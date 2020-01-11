@@ -8,7 +8,13 @@ exports.main = async (req, res) => {
   console.log("Body", body);
   console.log("Query", query);
 
-  const { command } = body;
+  const { token, command } = body;
+  if (token !== process.env.app_token) {
+    console.log("Unrecognized app token:", token);
+    res.status(417).send("Who are you?");
+    return;
+  }
+
   let ok;
   let message;
 

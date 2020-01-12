@@ -1,5 +1,3 @@
-const Spend = require("./spend");
-
 function verifyToken(token) {
   return token === process.env.app_token;
 }
@@ -22,6 +20,7 @@ exports.main = async (req, res) => {
   let message;
 
   if (command === "/spend") {
+    const Spend = require("./spend");
     ({ ok, message } = await Spend.handleSpend(body));
   } else {
     ({ ok, message} = {ok: false, message: `Command ${command} not recognized` });

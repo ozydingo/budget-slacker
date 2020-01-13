@@ -14,7 +14,7 @@ exports.main = async (req, res) => {
     res.status(417).send("Who are you?");
     return;
   }
-  res.status(200).send("");
+  res.status(200).send({text: "Got it.", response_type: "ephemeral"});
 
   let ok;
   let message;

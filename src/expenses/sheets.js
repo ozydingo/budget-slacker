@@ -1,5 +1,3 @@
-const {google} = require("googleapis");
-
 const MTD_FORMULA = "=sum(filter(D2:D, month(A2:A) = month(A2)))";
 
 const headers = [
@@ -22,8 +20,12 @@ function epochToDatetime(timestamp) {
   return  `${month}/${date}/${year} ${hour}:${minute}:${second}`;
 }
 
+// Lazy-load the google api, otherwise the response to Slack times out.
+let google;
+
 class Sheets {
   constructor(app_credentials, token_data) {
+    if (google === undefined) { google = require("googleapis"); }
     this.app_credentials = app_credentials;
     this.token_data = token_data;
     const { client_id, client_secret } = app_credentials;

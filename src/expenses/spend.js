@@ -24,7 +24,6 @@ async function handleSpend(body) {
   console.log("Spend data:", spendData);
   const { amount, category, note } = spendData;
   const confirmationMessage = `Got it! You spent ${amount} on the category ${category}, with a note: ${note}`;
-  // TODO: don't await but make sure to await before any return
   const confirmation = Slack.respond({ response_url, text: confirmationMessage }).then(response => {
     console.log("Confirmation response:", response);
   });

@@ -47,17 +47,135 @@ class Sheets {
       properties: {
         title: "Budget Slacker",
       },
+      sheets: [
+        {
+          "properties": {
+            "title": "expenses"
+          }
+        },
+        {
+          "properties": {
+            "title": "categories"
+          }
+        },
+      ]
     };
     const spreadsheet = await this.sheets.spreadsheets.create({
       resource,
-      fields: "spreadsheetId",
+      fields: "spreadsheetId,sheets.properties.title,sheets.properties.sheetId",
     });
 
     const spreadsheetId = spreadsheet.data.spreadsheetId;
+    const sheetIds = {};
+    spreadsheet.data.sheets.forEach(sheet => {
+      sheetIds[sheet.properties.title] = sheet.properties.sheetId;
+    });
+    console.log("Created sheets:", sheetIds);
 
-    const result = await this.addRow(spreadsheetId, headers);
-    console.log("createSpreadsheet result:", result);
+    const setupResult = await this.setupSheet(spreadsheetId, sheetIds);
+    console.log(setupResult);
     return spreadsheetId;
+  }
+
+  setupSheet(spreadsheetId, sheetIds) {
+    const promises = [];
+    promises.push(this.addRow(spreadsheetId, headers));
+
+    const categories = {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.categories,
+          startRowIndex: 0,
+          endRowIndex:  1,
+          startColumnIndex: 1,
+          endColumnIndex: 2,
+        },
+        cell: {
+          userEnteredValue: {
+            formulaValue: "=TRANSPOSE(UNIQUE(expenses!$E$2:$E))",
+          },
+        },
+        fields: "userEnteredValue",
+      }
+    };
+    const thisMonth = {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.categories,
+          startRowIndex: 1,
+          endRowIndex: 2,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+        cell: {
+          userEnteredValue: {
+            formulaValue: "=EOMONTH(TODAY(),-1)+1",
+          },
+        },
+        fields: "userEnteredValue",
+      }
+    };
+    const prevMonths = {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.categories,
+          startRowIndex: 2,
+          endRowIndex: 7,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+        cell: {
+          userEnteredValue: {
+            formulaValue: "=EOMONTH(A2-7,-1)+1",
+          },
+        },
+        fields: "userEnteredValue",
+      }
+    };
+    const subtotal = {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.categories,
+          startRowIndex: 1,
+          endRowIndex: 7,
+          startColumnIndex: 1,
+          endColumnIndex: 100,
+        },
+        cell: {
+          userEnteredValue: {
+            formulaValue: "=if(B$1=\"\",\"\",sum(filter(expenses!$D$2:$D,expenses!$E$2:$E=B$1,month(expenses!$A$2:$A)=month($A2), year(expenses!$A$2:$A)=year($A2))))",
+          },
+        },
+        fields: "userEnteredValue",
+      }
+    };
+
+    promises.push(this.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: spreadsheetId,
+      resource: {
+        requests: [
+          categories,
+          thisMonth,
+        ]
+      },
+    }));
+    promises.push(this.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: spreadsheetId,
+      resource: {
+        requests: [
+          prevMonths,
+        ]
+      },
+    }));
+    promises.push(this.sheets.spreadsheets.batchUpdate({
+      spreadsheetId: spreadsheetId,
+      resource: {
+        requests: [
+          subtotal,
+        ]
+      },
+    }));
+    return Promise.all(promises);
   }
 
   async addSpend(spreadsheetId, data) {
@@ -100,7 +218,7 @@ class Sheets {
   addRow(spreadsheetId, values) {
     return this.sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A1:F1",
+      range: "expenses!A1:F1",
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [values] },
     });

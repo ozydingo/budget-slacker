@@ -7,6 +7,7 @@ const { client_id, client_secret } = process.env;
 const app_credentials = { client_id, client_secret };
 
 async function bail(promises, message) {
+  console.log("Bailing out with message:", message);
   await Promise.all(promises);
   return {
     ok: false,
@@ -15,6 +16,7 @@ async function bail(promises, message) {
 }
 
 async function handleSpend(body) {
+  console.log("Handling spend command.");
   const promises = [];
   const { response_url, team_id, text, user_name, user_id } = body;
   const timestamp = new Date();
@@ -25,10 +27,11 @@ async function handleSpend(body) {
   const { amount, category, note } = spendData;
   const confirmationMessage = `Got it! You spent ${amount} on the category ${category}, with a note: ${note}`;
   const confirmation = Slack.respond({ response_url, text: confirmationMessage }).then(response => {
-    console.log("Confirmation response:", response);
+    console.log("Confirmation response:", response.status);
   });
   promises.push(confirmation);
 
+  console.log("Fetching budget info");
   const budget = await Budget.find(team_id);
   if (!budget) { return bail(promises, "Unfortunately, I can't find this workspace's buduget."); }
   console.log("Budget:", budget);
@@ -48,7 +51,7 @@ async function handleSpend(body) {
   );
   const resultMessage = `You've spent ${total} so far this month on ${category}`;
   promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
-    console.log("Result response:", response);
+    console.log("Result response:", response.status);
   }));
 
   await Promise.all(promises);
@@ -64,4 +67,5 @@ function parseSpend(text) {
 
 module.exports = {
   handleSpend,
+  parseSpend,
 };

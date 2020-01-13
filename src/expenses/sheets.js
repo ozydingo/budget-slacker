@@ -25,26 +25,30 @@ let google;
 
 class Sheets {
   constructor(app_credentials, token_data) {
+    console.log("Initializing sheets wrapperr");
     if (google === undefined) { google = require("googleapis"); }
     this.app_credentials = app_credentials;
     this.token_data = token_data;
     const { client_id, client_secret } = app_credentials;
+    console.log("Initializing OAuth2");
     this.client = new google.auth.OAuth2(
       client_id,
       client_secret,
     );
+    console.log("Setting credentials");
     this.client.setCredentials(token_data);
+    console.log("Initializing sheets client");
     this.sheets = google.sheets({version: "v4", auth: this.client});
+    console.log("Done with sheets initialization");
   }
 
   async createSpreadsheet() {
-    const sheets = google.sheets({version: "v4", auth: this.client});
     const resource = {
       properties: {
         title: "Budget Slacker",
       },
     };
-    const spreadsheet = await sheets.spreadsheets.create({
+    const spreadsheet = await this.sheets.spreadsheets.create({
       resource,
       fields: "spreadsheetId",
     });
@@ -78,14 +82,17 @@ class Sheets {
       MTD_FORMULA,
     ];
 
+    console.log("Appending row with", values);
     const response = await this.addRow(spreadsheetId, values);
     const range = response.data.updates.updatedRange;
 
+    console.log("Reading values for formula evaluation");
     const result = await this.sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
     });
     const total = result.data.values[0][6];
+    console.log("Got total:", total);
 
     return total;
   }

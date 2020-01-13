@@ -25,8 +25,8 @@ let google;
 
 class Sheets {
   constructor(app_credentials, token_data) {
-    console.log("Initializing sheets wrapperr");
-    if (google === undefined) { google = require("googleapis"); }
+    console.log("Initializing sheets wrapper");
+    if (google === undefined) { ({google} = require("googleapis")); }
     this.app_credentials = app_credentials;
     this.token_data = token_data;
     const { client_id, client_secret } = app_credentials;

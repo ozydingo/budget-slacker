@@ -34,7 +34,7 @@ async function handleSpend(body) {
   console.log("Fetching budget info");
   const budget = await Budget.find(team_id);
   if (!budget) { return bail(promises, "Unfortunately, I can't find this workspace's buduget."); }
-  console.log("Budget:", budget);
+  console.log("Budget:", budget.data());
 
   const { access_token, refresh_token, spreadsheet_id } = budget.data();
   if (!access_token) { return bail(promises, "access_token is missing from this workspace!"); }

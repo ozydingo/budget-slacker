@@ -14,7 +14,7 @@ exports.main = async (req, res) => {
     res.status(417).send("Who are you?");
     return;
   }
-  res.status(200).send({text: "Got it.", response_type: "ephemeral"});
+  res.status(200).write("Got it");
 
   let ok;
   let message;
@@ -26,4 +26,5 @@ exports.main = async (req, res) => {
     ({ ok, message} = {ok: false, message: `Command ${command} not recognized` });
   }
   console.log({ ok, message });
+  res.end();
 };

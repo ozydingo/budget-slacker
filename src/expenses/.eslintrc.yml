@@ -1,6 +1,7 @@
 env:
   commonjs: true
   es6: true
+  jest/globals: true
   node: true
 extends: 'eslint:recommended'
 globals:
@@ -8,6 +9,8 @@ globals:
   SharedArrayBuffer: readonly
 parserOptions:
   ecmaVersion: 2018
+plugins:
+  - jest
 rules:
   indent:
     - error

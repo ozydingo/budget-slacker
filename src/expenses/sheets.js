@@ -1,5 +1,3 @@
-const MTD_FORMULA = "=sum(filter(D2:D, month(A2:A) = month(A2)))";
-
 const headers = [
   "timestamp",
   "user_id",
@@ -7,8 +5,10 @@ const headers = [
   "amount",
   "category",
   "note",
-  "MTD",
 ];
+const EXPENSE_RANGE = "expenses!A1:F1";
+const MAX_CATEGORIES = 100;
+const HISTORY = 6;
 
 function epochToDatetime(timestamp) {
   const month = timestamp.getMonth() + 1;
@@ -42,68 +42,162 @@ class Sheets {
     console.log("Done with sheets initialization");
   }
 
-  async createSpreadsheet() {
+  async setup() {
+    try {
+      const spreadsheet = await this.createSpreadsheet();
+      const spreadsheetId = spreadsheet.data.spreadsheetId;
+      const sheetIds = this.getSheetIds(spreadsheet);
+      console.log("Created spreadsheet with id", spreadsheetId);
+      console.log("Sheets:", sheetIds);
+      const setupResult = await this.setupSheetValues(spreadsheetId, sheetIds);
+      console.log("Setup results:", setupResult);
+      return spreadsheetId;
+    } catch(err) {
+      console.error("Error:", err);
+    }
+  }
+
+  createSpreadsheet() {
     const resource = {
       properties: {
         title: "Budget Slacker",
       },
+      sheets: [
+        {
+          properties: {
+            title: "expenses"
+          }
+        },
+        {
+          properties: {
+            title: "categories"
+          }
+        },
+      ]
     };
-    const spreadsheet = await this.sheets.spreadsheets.create({
+    const fields = "spreadsheetId,sheets.properties.title,sheets.properties.sheetId";
+    return this.sheets.spreadsheets.create({
       resource,
-      fields: "spreadsheetId",
+      fields,
     });
-
-    const spreadsheetId = spreadsheet.data.spreadsheetId;
-
-    const result = await this.addRow(spreadsheetId, headers);
-    console.log("createSpreadsheet result:", result);
-    return spreadsheetId;
   }
 
-  async addSpend(spreadsheetId, data) {
-    const {
-      timestamp,
-      user_id,
-      user_name,
-      amount,
-      category,
-      note
-    } = data;
+  getSheetIds(spreadsheet) {
+    const sheetIds = {};
+    spreadsheet.data.sheets.forEach(sheet => {
+      sheetIds[sheet.properties.title] = sheet.properties.sheetId;
+    });
+    return sheetIds;
+  }
 
-    const datetime = epochToDatetime(timestamp);
+  setupSheetValues(spreadsheetId, sheetIds) {
+    const expenseHeadersRequest = {
+      spreadsheetId,
+      range: EXPENSE_RANGE,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [headers] },
+    };
 
+    const categoryHeaderValues = {
+      range: "categories!B1",
+      values: [
+        ["=TRANSPOSE(UNIQUE(expenses!$E$2:$E))"]
+      ]
+    };
+    const thisMonthValues = {
+      range: "categories!A2",
+      values: [
+        ["=EOMONTH(TODAY(),-1)+1"]
+      ]
+    };
+
+    const categoriesSeedRequest = {
+      spreadsheetId,
+      resource: {
+        valueInputOption: "USER_ENTERED",
+        data: [
+          categoryHeaderValues,
+          thisMonthValues
+        ]
+      }
+    };
+
+    const prevMonthsValues = {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.categories,
+          startRowIndex: 2,
+          endRowIndex: HISTORY + 1,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+        cell: {
+          userEnteredValue: {
+            formulaValue: "=EOMONTH(A2-7,-1)+1",
+          },
+        },
+        fields: "userEnteredValue",
+      }
+    };
+    const subtotalValues = {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.categories,
+          startRowIndex: 1,
+          endRowIndex: HISTORY + 1,
+          startColumnIndex: 1,
+          endColumnIndex: MAX_CATEGORIES,
+        },
+        cell: {
+          userEnteredValue: {
+            formulaValue: "=if(B$1=\"\",\"\",sum(filter(expenses!$D$2:$D,expenses!$E$2:$E=B$1,month(expenses!$A$2:$A)=month($A2), year(expenses!$A$2:$A)=year($A2))))",
+          },
+        },
+        fields: "effectiveValue",
+      }
+    };
+    const categoriesFillRequest = {
+      spreadsheetId,
+      resource: {
+        requests: [
+          prevMonthsValues,
+          subtotalValues
+        ]
+      },
+    };
+
+    return Promise.all([
+      this.sheets.spreadsheets.values.append(expenseHeadersRequest).then(res => res.data.updates),
+      this.sheets.spreadsheets.values.batchUpdate(categoriesSeedRequest).then(res => res.data.responses),
+      this.sheets.spreadsheets.batchUpdate(categoriesFillRequest).then(res => res.data.replies ),
+    ]);
+  }
+
+  addExpense(spreadsheetId, data) {
     const values = [
-      datetime,
-      user_id,
-      user_name,
-      amount,
-      category,
-      note,
-      MTD_FORMULA,
+      epochToDatetime(data.timestamp),
+      data.user_id,
+      data.user_name,
+      data.amount,
+      data.category,
+      data.note,
     ];
 
     console.log("Appending row with", values);
-    const response = await this.addRow(spreadsheetId, values);
-    const range = response.data.updates.updatedRange;
-
-    console.log("Reading values for formula evaluation");
-    const result = await this.sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-    const total = result.data.values[0][6];
-    console.log("Got total:", total);
-
-    return total;
-  }
-
-  addRow(spreadsheetId, values) {
     return this.sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A1:F1",
+      range: EXPENSE_RANGE,
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [values] },
     });
+  }
+
+  async getTotals(spreadsheetId) {
+    const result = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `expenses!A2:ZZ${HISTORY+1}`,
+    });
+    return result;
   }
 }
 

@@ -45,7 +45,7 @@ async function handleSpend(body) {
   const token_credentials = { access_token, refresh_token };
   const sheets = new Sheets(app_credentials, token_credentials);
 
-  const total = await sheets.addSpend(
+  const total = await sheets.addExpennse(
     spreadsheet_id,
     { timestamp, user_id, user_name, amount, category, note }
   );

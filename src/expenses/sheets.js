@@ -6,6 +6,7 @@ const headers = [
   "category",
   "note",
 ];
+const EXPENSE_RANGE = "expenses!A1:F1";
 
 function epochToDatetime(timestamp) {
   const month = timestamp.getMonth() + 1;
@@ -84,6 +85,13 @@ class Sheets {
   }
 
   setupSheetValues(spreadsheetId, sheetIds) {
+    const expenseHeadersRequest = {
+      spreadsheetId,
+      range: EXPENSE_RANGE,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [headers] },
+    };
+
     const categoryHeaderValues = {
       range: "categories!B1",
       values: [
@@ -153,13 +161,13 @@ class Sheets {
     };
 
     return Promise.all([
-      this.addExpenseRow(spreadsheetId, headers).then(res => res.data.updates),
+      this.sheets.spreadsheets.values.append(expenseHeadersRequest).then(res => res.data.updates),
       this.sheets.spreadsheets.values.batchUpdate(categoriesSeedRequest).then(res => res.data.responses),
       this.sheets.spreadsheets.batchUpdate(categoriesFillRequest).then(res => res.data.replies ),
     ]);
   }
 
-  async addSpend(spreadsheetId, data) {
+  addExpense(spreadsheetId, data) {
     const values = [
       epochToDatetime(data.timestamp),
       data.user_id,
@@ -170,24 +178,9 @@ class Sheets {
     ];
 
     console.log("Appending row with", values);
-    const response = await this.addExpenseRow(spreadsheetId, values);
-    const range = response.data.updates.updatedRange;
-
-    console.log("Reading values for formula evaluation");
-    const result = await this.sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
-    const total = result.data.values[0][6];
-    console.log("Got total:", total);
-
-    return total;
-  }
-
-  addExpenseRow(spreadsheetId, values) {
     return this.sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "expenses!A1:F1",
+      range: EXPENSE_RANGE,
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [values] },
     });

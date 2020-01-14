@@ -43,14 +43,18 @@ class Sheets {
   }
 
   async setup() {
-    const spreadsheet = await this.createSpreadsheet();
-    const spreadsheetId = spreadsheet.data.spreadsheetId;
-    const sheetIds = this.getSheetIds(spreadsheet);
-    console.log("Created spreadsheet with id", spreadsheetId);
-    console.log("Sheets:", sheetIds);
-    const setupResult = await this.setupSheetValues(spreadsheetId, sheetIds);
-    console.log("Setup results:", setupResult);
-    return spreadsheetId;
+    try {
+      const spreadsheet = await this.createSpreadsheet();
+      const spreadsheetId = spreadsheet.data.spreadsheetId;
+      const sheetIds = this.getSheetIds(spreadsheet);
+      console.log("Created spreadsheet with id", spreadsheetId);
+      console.log("Sheets:", sheetIds);
+      const setupResult = await this.setupSheetValues(spreadsheetId, sheetIds);
+      console.log("Setup results:", setupResult);
+      return spreadsheetId;
+    } catch(err) {
+      console.error("Error:", err);
+    }
   }
 
   createSpreadsheet() {
@@ -186,6 +190,14 @@ class Sheets {
       valueInputOption: "USER_ENTERED",
       requestBody: { values: [values] },
     });
+  }
+
+  async getTotals(spreadsheetId) {
+    const result = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `expenses!A2:ZZ${HISTORY+1}`,
+    });
+    return result;
   }
 }
 

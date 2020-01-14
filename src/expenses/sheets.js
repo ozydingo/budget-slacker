@@ -49,20 +49,21 @@ class Sheets {
       },
       sheets: [
         {
-          "properties": {
-            "title": "expenses"
+          properties: {
+            title: "expenses"
           }
         },
         {
-          "properties": {
-            "title": "categories"
+          properties: {
+            title: "categories"
           }
         },
       ]
     };
+    const fields = "spreadsheetId,sheets.properties.title,sheets.properties.sheetId";
     const spreadsheet = await this.sheets.spreadsheets.create({
       resource,
-      fields: "spreadsheetId,sheets.properties.title,sheets.properties.sheetId",
+      fields,
     });
 
     const spreadsheetId = spreadsheet.data.spreadsheetId;
@@ -81,41 +82,31 @@ class Sheets {
     const promises = [];
     promises.push(this.addRow(spreadsheetId, headers));
 
-    const categories = {
-      repeatCell: {
-        range: {
-          sheetId: sheetIds.categories,
-          startRowIndex: 0,
-          endRowIndex:  1,
-          startColumnIndex: 1,
-          endColumnIndex: 2,
-        },
-        cell: {
-          userEnteredValue: {
-            formulaValue: "=TRANSPOSE(UNIQUE(expenses!$E$2:$E))",
-          },
-        },
-        fields: "userEnteredValue",
-      }
+    const categoryHeaderValues = {
+      range: "categories!B1",
+      values: [
+        ["=TRANSPOSE(UNIQUE(expenses!$E$2:$E))"]
+      ]
     };
-    const thisMonth = {
-      repeatCell: {
-        range: {
-          sheetId: sheetIds.categories,
-          startRowIndex: 1,
-          endRowIndex: 2,
-          startColumnIndex: 0,
-          endColumnIndex: 1,
-        },
-        cell: {
-          userEnteredValue: {
-            formulaValue: "=EOMONTH(TODAY(),-1)+1",
-          },
-        },
-        fields: "userEnteredValue",
-      }
+    const thisMonthValues = {
+      range: "categories!A2",
+      values: [
+        ["=EOMONTH(TODAY(),-1)+1"]
+      ]
     };
-    const prevMonths = {
+
+    promises.push(this.sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      resource: {
+        valueInputOption: "USER_ENTERED",
+        data: [
+          categoryHeaderValues,
+          thisMonthValues
+        ]
+      }
+    }));
+
+    const prevMonthsValues = {
       repeatCell: {
         range: {
           sheetId: sheetIds.categories,
@@ -132,7 +123,7 @@ class Sheets {
         fields: "userEnteredValue",
       }
     };
-    const subtotal = {
+    const subtotalValues = {
       repeatCell: {
         range: {
           sheetId: sheetIds.categories,
@@ -151,27 +142,11 @@ class Sheets {
     };
 
     promises.push(this.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: spreadsheetId,
+      spreadsheetId,
       resource: {
         requests: [
-          categories,
-          thisMonth,
-        ]
-      },
-    }));
-    promises.push(this.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: spreadsheetId,
-      resource: {
-        requests: [
-          prevMonths,
-        ]
-      },
-    }));
-    promises.push(this.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: spreadsheetId,
-      resource: {
-        requests: [
-          subtotal,
+          prevMonthsValues,
+          subtotalValues
         ]
       },
     }));

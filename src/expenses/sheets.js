@@ -7,6 +7,8 @@ const headers = [
   "note",
 ];
 const EXPENSE_RANGE = "expenses!A1:F1";
+const MAX_CATEGORIES = 100;
+const HISTORY = 6;
 
 function epochToDatetime(timestamp) {
   const month = timestamp.getMonth() + 1;
@@ -121,7 +123,7 @@ class Sheets {
         range: {
           sheetId: sheetIds.categories,
           startRowIndex: 2,
-          endRowIndex: 7,
+          endRowIndex: HISTORY + 1,
           startColumnIndex: 0,
           endColumnIndex: 1,
         },
@@ -138,9 +140,9 @@ class Sheets {
         range: {
           sheetId: sheetIds.categories,
           startRowIndex: 1,
-          endRowIndex: 7,
+          endRowIndex: HISTORY + 1,
           startColumnIndex: 1,
-          endColumnIndex: 100,
+          endColumnIndex: MAX_CATEGORIES,
         },
         cell: {
           userEnteredValue: {

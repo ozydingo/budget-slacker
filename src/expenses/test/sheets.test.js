@@ -8,4 +8,6 @@ test("it creates a spreadsheet", async () => {
     amount: 12,
     category: "dining"
   });
+  const totals = await sheets.getTotals(spreadsheetId);
+  console.log({totals});
 });

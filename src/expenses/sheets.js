@@ -150,7 +150,7 @@ class Sheets {
         },
         cell: {
           userEnteredValue: {
-            formulaValue: "=if(B$1=\"\",\"\",sum(filter(expenses!$D$2:$D,expenses!$E$2:$E=B$1,month(expenses!$A$2:$A)=month($A2), year(expenses!$A$2:$A)=year($A2))))",
+            formulaValue: "=if(B$1=\"\",\"\",ifna(sum(filter(expenses!$D$2:$D,expenses!$E$2:$E=B$1,month(expenses!$A$2:$A)=month($A2), year(expenses!$A$2:$A)=year($A2))),0))",
           },
         },
         fields: "userEnteredValue",
@@ -195,9 +195,9 @@ class Sheets {
   async getTotals(spreadsheetId) {
     const result = await this.sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `expenses!A2:ZZ${HISTORY+1}`,
+      range: `categories!A2:ZZ${HISTORY+1}`,
     });
-    return result;
+    return result.data.values;
   }
 }
 

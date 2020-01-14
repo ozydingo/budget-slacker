@@ -1,5 +1,3 @@
-const MTD_FORMULA = "=sum(filter(D2:D, month(A2:A) = month(A2)))";
-
 const headers = [
   "timestamp",
   "user_id",
@@ -7,7 +5,6 @@ const headers = [
   "amount",
   "category",
   "note",
-  "MTD",
 ];
 
 function epochToDatetime(timestamp) {
@@ -172,7 +169,6 @@ class Sheets {
       amount,
       category,
       note,
-      MTD_FORMULA,
     ];
 
     console.log("Appending row with", values);

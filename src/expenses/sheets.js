@@ -39,7 +39,18 @@ class Sheets {
     console.log("Done with sheets initialization");
   }
 
-  async createSpreadsheet() {
+  async setup() {
+    const spreadsheet = await this.createSpreadsheet();
+    const spreadsheetId = spreadsheet.data.spreadsheetId;
+    const sheetIds = this.getSheetIds(spreadsheet);
+    console.log("Created spreadsheet with id", spreadsheetId);
+    console.log("Sheets:", sheetIds);
+    const setupResult = await this.setupSheetValues(spreadsheetId, sheetIds);
+    console.log("Setup results:", setupResult);
+    return spreadsheetId;
+  }
+
+  createSpreadsheet() {
     const resource = {
       properties: {
         title: "Budget Slacker",
@@ -58,27 +69,21 @@ class Sheets {
       ]
     };
     const fields = "spreadsheetId,sheets.properties.title,sheets.properties.sheetId";
-    const spreadsheet = await this.sheets.spreadsheets.create({
+    return this.sheets.spreadsheets.create({
       resource,
       fields,
     });
+  }
 
-    const spreadsheetId = spreadsheet.data.spreadsheetId;
+  getSheetIds(spreadsheet) {
     const sheetIds = {};
     spreadsheet.data.sheets.forEach(sheet => {
       sheetIds[sheet.properties.title] = sheet.properties.sheetId;
     });
-    console.log("Created sheets:", sheetIds);
-
-    const setupResult = await this.setupSheet(spreadsheetId, sheetIds);
-    console.log(setupResult);
-    return spreadsheetId;
+    return sheetIds;
   }
 
-  setupSheet(spreadsheetId, sheetIds) {
-    const promises = [];
-    promises.push(this.addRow(spreadsheetId, headers));
-
+  setupSheetValues(spreadsheetId, sheetIds) {
     const categoryHeaderValues = {
       range: "categories!B1",
       values: [
@@ -92,7 +97,7 @@ class Sheets {
       ]
     };
 
-    promises.push(this.sheets.spreadsheets.values.batchUpdate({
+    const categoriesSeedRequest = {
       spreadsheetId,
       resource: {
         valueInputOption: "USER_ENTERED",
@@ -101,7 +106,7 @@ class Sheets {
           thisMonthValues
         ]
       }
-    }));
+    };
 
     const prevMonthsValues = {
       repeatCell: {
@@ -134,11 +139,10 @@ class Sheets {
             formulaValue: "=if(B$1=\"\",\"\",sum(filter(expenses!$D$2:$D,expenses!$E$2:$E=B$1,month(expenses!$A$2:$A)=month($A2), year(expenses!$A$2:$A)=year($A2))))",
           },
         },
-        fields: "userEnteredValue",
+        fields: "effectiveValue",
       }
     };
-
-    promises.push(this.sheets.spreadsheets.batchUpdate({
+    const categoriesFillRequest = {
       spreadsheetId,
       resource: {
         requests: [
@@ -146,33 +150,27 @@ class Sheets {
           subtotalValues
         ]
       },
-    }));
-    return Promise.all(promises);
+    };
+
+    return Promise.all([
+      this.addExpenseRow(spreadsheetId, headers).then(res => res.data.updates),
+      this.sheets.spreadsheets.values.batchUpdate(categoriesSeedRequest).then(res => res.data.responses),
+      this.sheets.spreadsheets.batchUpdate(categoriesFillRequest).then(res => res.data.replies ),
+    ]);
   }
 
   async addSpend(spreadsheetId, data) {
-    const {
-      timestamp,
-      user_id,
-      user_name,
-      amount,
-      category,
-      note
-    } = data;
-
-    const datetime = epochToDatetime(timestamp);
-
     const values = [
-      datetime,
-      user_id,
-      user_name,
-      amount,
-      category,
-      note,
+      epochToDatetime(data.timestamp),
+      data.user_id,
+      data.user_name,
+      data.amount,
+      data.category,
+      data.note,
     ];
 
     console.log("Appending row with", values);
-    const response = await this.addRow(spreadsheetId, values);
+    const response = await this.addExpenseRow(spreadsheetId, values);
     const range = response.data.updates.updatedRange;
 
     console.log("Reading values for formula evaluation");
@@ -186,7 +184,7 @@ class Sheets {
     return total;
   }
 
-  addRow(spreadsheetId, values) {
+  addExpenseRow(spreadsheetId, values) {
     return this.sheets.spreadsheets.values.append({
       spreadsheetId,
       range: "expenses!A1:F1",

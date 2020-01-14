@@ -13,7 +13,7 @@ const HISTORY = 6;
 function epochToDatetime(timestamp) {
   const month = timestamp.getMonth() + 1;
   const date = timestamp.getDate();
-  const year = timestamp.getYear();
+  const year = timestamp.getFullYear();
   const hour = timestamp.getHours();
   const minute = timestamp.getMinutes();
   const second =  timestamp.getSeconds();

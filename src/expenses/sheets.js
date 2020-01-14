@@ -153,7 +153,7 @@ class Sheets {
             formulaValue: "=if(B$1=\"\",\"\",sum(filter(expenses!$D$2:$D,expenses!$E$2:$E=B$1,month(expenses!$A$2:$A)=month($A2), year(expenses!$A$2:$A)=year($A2))))",
           },
         },
-        fields: "effectiveValue",
+        fields: "userEnteredValue",
       }
     };
     const categoriesFillRequest = {

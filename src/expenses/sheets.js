@@ -195,9 +195,14 @@ class Sheets {
   async getTotals(spreadsheetId) {
     const result = await this.sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `categories!A2:ZZ${HISTORY+1}`,
+      range: `categories!B1:ZZ${HISTORY+1}`,
+      majorDimension: "COLUMNS",
     });
-    return result.data.values;
+    const totals = {};
+    result.data.values.forEach(array => {
+      totals[array[0]] = array.slice(1).map(Number);
+    });
+    return totals;
   }
 }
 

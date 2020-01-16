@@ -15,7 +15,8 @@
     "moduleDirectories": [
       "node_modules",
       "."
-    ]
+    ],
+    "testEnvironment": "node"
   },
   "scripts": {
     "dev": "export GOOGLE_APPLICATION_CREDENTIALS=$HOME/etc/budget-slacker-0afb0999d179.json",

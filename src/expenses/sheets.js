@@ -1,3 +1,5 @@
+const Budget = require("./budgets");
+
 const headers = [
   "timestamp",
   "user_id",
@@ -42,15 +44,19 @@ class Sheets {
     console.log("Done with sheets initialization");
   }
 
-  async setup() {
+  async setup(teamId) {
     try {
+      console.log("Team", teamId);
       const spreadsheet = await this.createSpreadsheet();
       const spreadsheetId = spreadsheet.data.spreadsheetId;
-      const sheetIds = this.getSheetIds(spreadsheet);
       console.log("Created spreadsheet with id", spreadsheetId);
+      const updateBudgetPromise = Budget.update(teamId, {spreadsheet_id: spreadsheetId});
+      const sheetIds = this.getSheetIds(spreadsheet);
       console.log("Sheets:", sheetIds);
       const setupResult = await this.setupSheetValues(spreadsheetId, sheetIds);
       console.log("Setup results:", setupResult);
+
+      await updateBudgetPromise;
       return spreadsheetId;
     } catch(err) {
       console.error("Error:", err);

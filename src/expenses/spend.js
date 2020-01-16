@@ -45,14 +45,18 @@ async function handleSpend(body) {
   const token_credentials = { access_token, refresh_token };
   const sheets = new Sheets(app_credentials, token_credentials);
 
-  const total = await sheets.addExpense(
-    spreadsheet_id,
-    { timestamp, user_id, user_name, amount, category, note }
-  );
-  const resultMessage = `You've spent ${total} so far this month on ${category}`;
+  // Do this first to be sure we aren't waiting for the formula result to update
+  const totals = await sheets.getTotals(spreadsheet_id);
+  const total = totals[category][0] + amount;
+  const resultMessage = `You've spent $${total} so far this month on ${category}`;
   promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
     console.log("Result response:", response.status);
   }));
+
+  await sheets.addExpense(
+    spreadsheet_id,
+    { timestamp, user_id, user_name, amount, category, note }
+  );
 
   await Promise.all(promises);
   return {ok: true, message: confirmationMessage};

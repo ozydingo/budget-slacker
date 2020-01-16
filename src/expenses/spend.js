@@ -25,7 +25,7 @@ async function handleSpend(body) {
 
   console.log("Spend data:", spendData);
   const { amount, category, note } = spendData;
-  const confirmationMessage = `Got it! You spent ${amount} on the category ${category}, with a note: ${note}`;
+  const confirmationMessage = `Got it! You spent $${amount} on the category ${category}, with a note: ${note}`;
   const confirmation = Slack.respond({ response_url, text: confirmationMessage }).then(response => {
     console.log("Confirmation response:", response.status);
   });
@@ -47,7 +47,7 @@ async function handleSpend(body) {
 
   // Do this first to be sure we aren't waiting for the formula result to update
   const totals = await sheets.getTotals(spreadsheet_id);
-  const total = totals[category][0] + amount;
+  const total = Number(totals[category][0]) + Number(amount);
   const resultMessage = `You've spent $${total} so far this month on ${category}`;
   promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
     console.log("Result response:", response.status);

@@ -21,6 +21,7 @@
   "scripts": {
     "dev": "export GOOGLE_APPLICATION_CREDENTIALS=$HOME/etc/budget-slacker-0afb0999d179.json",
     "lint": "./node_modules/.bin/eslint . ;:",
-    "test": "jest; :"
+    "setup": "node setup/init.js",
+    "test": "jest src; :"
   }
 }

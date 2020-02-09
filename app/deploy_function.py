@@ -44,14 +44,14 @@ def GenerateConfig(ctx):
     )
     chunk_length = 3500
     content_chunks = [content[ii:ii+chunk_length] for ii in range(0,len(content), chunk_length)]
-    cmds = ["echo '%s' | base64 -d > /expenses/function.zip;" % (content_chunks[0].decode('ascii'))]
+    cmds = ["echo '%s' | base64 -d > /src/function.zip;" % (content_chunks[0].decode('ascii'))]
     cmds += [
-        "echo '%s' | base64 -d >> /expenses/function.zip;" % (chunk.decode('ascii'))
+        "echo '%s' | base64 -d >> /src/function.zip;" % (chunk.decode('ascii'))
         for chunk in content_chunks[1:]
     ]
     volumes = [{
         'name': 'function-code',
-        'path': '/expenses'
+        'path': '/src'
     }]
     zip_steps = [
         {
@@ -69,7 +69,7 @@ def GenerateConfig(ctx):
         'properties': {
             'steps': zip_steps + [{
                 'name': 'gcr.io/cloud-builders/gsutil',
-                'args': ['cp', '/expenses/function.zip', source_archive_url],
+                'args': ['cp', '/src/function.zip', source_archive_url],
                 'volumes': volumes
             }],
             'timeout':

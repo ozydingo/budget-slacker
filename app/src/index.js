@@ -14,7 +14,7 @@ exports.main = async (req, res) => {
     res.status(417).send("Who are you?");
     return;
   }
-  res.status(200).write("Got it");
+  res.status(200).write("Got it!");
 
   let ok;
   let message;

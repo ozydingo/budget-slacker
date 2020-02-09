@@ -1,0 +1,27 @@
+imports:
+- path: deploy_function.py
+- path: expenses/budgets.js
+- path: expenses/index.js
+- path: expenses/package.json
+- path: expenses/sheets.js
+- path: expenses/slack.js
+- path: expenses/spend.js
+
+resources:
+- name: function
+  type: deploy_function.py
+  properties:
+    # All the files that start with this prefix will be packed in the Cloud Function
+    codeLocation: expenses/
+    codeBucket: budget-slacker-deploy
+    codeBucketObject: function.zip
+    location: us-east1
+    timeout: 60s
+    runtime: nodejs8
+    availableMemoryMb: 256
+    entryPoint: main
+outputs:
+- name: function-url
+  value: $(ref.function.url)
+- name: function-name
+  value: $(ref.function.name)

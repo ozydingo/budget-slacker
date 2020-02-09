@@ -14,3 +14,11 @@ Slack integration
 1. Build a slack app
 2. Add a slash command: `/spend`
 3. Install app to workspace
+
+## Deploying via Deployment Manager
+
+from the `src` directory:
+
+```
+gcloud deployment-manager deployments update budget-slacker --config budget-slacker.yml
+```

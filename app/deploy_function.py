@@ -22,16 +22,17 @@ import zipfile
 def GenerateConfig(ctx):
     """Generate YAML resource configuration."""
     in_memory_output_file = BytesIO()
-    function_name = ctx.env['deployment'] + '-cf'
+    function_name = ctx.env['name'] + '-function'
     zip_file = zipfile.ZipFile(
         in_memory_output_file,
         mode='w',
         compression=zipfile.ZIP_DEFLATED
     )
+    prefix = ctx.properties['codeLocation'] + '/';
     for imp in ctx.imports:
-        if imp.startswith(ctx.properties['codeLocation']):
+        if imp.startswith(prefix):
             zip_file.writestr(
-                imp[len(ctx.properties['codeLocation']):],
+                imp[len(prefix):],
                 ctx.imports[imp]
             )
     zip_file.close()
@@ -44,14 +45,22 @@ def GenerateConfig(ctx):
     )
     chunk_length = 3500
     content_chunks = [content[ii:ii+chunk_length] for ii in range(0,len(content), chunk_length)]
-    cmds = ["echo '%s' | base64 -d > /src/function.zip;" % (content_chunks[0].decode('ascii'))]
+    cmds = ["echo '%s' | base64 -d > /%s/%s;" % (
+        content_chunks[0].decode('ascii'),
+        ctx.properties['codeLocation'],
+        ctx.properties['codeBucketObject']
+    )]
     cmds += [
-        "echo '%s' | base64 -d >> /src/function.zip;" % (chunk.decode('ascii'))
+        "echo '%s' | base64 -d >> /%s/%s;" % (
+            chunk.decode('ascii'),
+            ctx.properties['codeLocation'],
+            ctx.properties['codeBucketObject']
+        )
         for chunk in content_chunks[1:]
     ]
     volumes = [{
-        'name': 'function-code',
-        'path': '/src'
+        'name': 'code-%s' % (function_name),
+        'path': '/%s' % (ctx.properties['codeLocation'])
     }]
     zip_steps = [
         {
@@ -60,8 +69,9 @@ def GenerateConfig(ctx):
             'volumes': volumes,
         } for cmd in cmds
     ]
+    build_step_name = '%s-upload-function-code' % (ctx.env['name'])
     build_step = {
-        'name': 'upload-function-code',
+        'name': build_step_name,
         'action': 'gcp-types/cloudbuild-v1:cloudbuild.projects.builds.create',
         'metadata': {
             'runtimePolicy': ['UPDATE_ON_CHANGE']
@@ -69,7 +79,14 @@ def GenerateConfig(ctx):
         'properties': {
             'steps': zip_steps + [{
                 'name': 'gcr.io/cloud-builders/gsutil',
-                'args': ['cp', '/src/function.zip', source_archive_url],
+                'args': [
+                    'cp',
+                    '/%s/%s' % (
+                        ctx.properties['codeLocation'],
+                        ctx.properties['codeBucketObject']
+                    ),
+                    source_archive_url
+                ],
                 'volumes': volumes
             }],
             'timeout':
@@ -108,7 +125,7 @@ def GenerateConfig(ctx):
                 ctx.properties['runtime']
             },
         'metadata': {
-            'dependsOn': ['upload-function-code']
+            'dependsOn': [build_step_name]
         }
     }
     resources = [build_step, cloud_function]

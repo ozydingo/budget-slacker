@@ -1,27 +1,42 @@
 imports:
 - path: deploy_function.py
-- path: src/budgets.js
-- path: src/index.js
-- path: src/package.json
-- path: src/sheets.js
-- path: src/slack.js
-- path: src/spend.js
+- path: handle_slack/index.js
+- path: budget_worker/budgets.js
+- path: budget_worker/index.js
+- path: budget_worker/package.json
+- path: budget_worker/sheets.js
+- path: budget_worker/slack.js
+- path: budget_worker/spend.js
 
 resources:
-- name: function
+- name: budget-worker
   type: deploy_function.py
   properties:
-    # All the files that start with this prefix will be packed in the Cloud Function
-    codeLocation: src/
+    codeLocation: budget_worker
     codeBucket: budget-slacker-deploy
-    codeBucketObject: function.zip
+    codeBucketObject: budget_worker.zip
+    location: us-east1
+    timeout: 60s
+    runtime: nodejs8
+    availableMemoryMb: 256
+    entryPoint: main
+- name: handle-slack
+  type: deploy_function.py
+  properties:
+    codeLocation: handle_slack
+    codeBucket: budget-slacker-deploy
+    codeBucketObject: handle_slack.zip
     location: us-east1
     timeout: 60s
     runtime: nodejs8
     availableMemoryMb: 256
     entryPoint: main
 outputs:
-- name: function-url
-  value: $(ref.function.url)
-- name: function-name
-  value: $(ref.function.name)
+- name: handle-slack-url
+  value: $(ref.handle-slack.url)
+- name: handle-slack-name
+  value: $(ref.handle-slack.name)
+- name: budget-worker-url
+  value: $(ref.budget-worker.url)
+- name: budget-worker-name
+  value: $(ref.budget-worker.name)

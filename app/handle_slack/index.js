@@ -1,9 +1,9 @@
-const { PubSub } = require('@google-cloud/pubsub');
+const { PubSub } = require("@google-cloud/pubsub");
 
 const APP_TOKEN = process.env.app_token;
-const PROJECT_ID = 'budget-slacker';
+const PROJECT_ID = "budget-slacker";
 const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
-const PUBSUB_TOPIC = 'slack-event';
+const PUBSUB_TOPIC = "slack-event";
 
 function verifyToken(token) {
   return token === APP_TOKEN;
@@ -32,7 +32,7 @@ async function handleSpend({ ok, spendData }) {
   const client = new PubSub({projectId: PROJECT_ID});
   const dataBuffer = Buffer.from(JSON.stringify(spendData));
   const messageId = await client.topic(PUBSUB_TOPIC).publish(dataBuffer);
-  console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`)
+  console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`);
 }
 
 // Main event function handler

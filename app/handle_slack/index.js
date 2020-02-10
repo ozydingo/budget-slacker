@@ -1,5 +1,9 @@
-const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
+const { PubSub } = require('@google-cloud/pubsub');
+
 const APP_TOKEN = process.env.app_token;
+const PROJECT_ID = 'budget-slacker';
+const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
+const PUBSUB_TOPIC = 'slack-event';
 
 function verifyToken(token) {
   return token === APP_TOKEN;
@@ -14,10 +18,21 @@ function parseSpend(text) {
 
 function spendMessage({ ok, spendData }) {
   if (ok) {
-    return `$${spendData.amount} on ${spendData}, got it!`;
+    return `$${spendData.amount} on ${spendData.category}, got it!`;
   } else {
     return "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\"";
   }
+}
+
+async function handleSpend({ ok, spendData }) {
+  console.log("Handling spend command");
+  console.log({ ok, spendData });
+  if (!ok) { return; }
+
+  const client = new PubSub({projectId: PROJECT_ID});
+  const dataBuffer = Buffer.from(JSON.stringify(spendData));
+  const messageId = await client.topic(PUBSUB_TOPIC).publish(dataBuffer);
+  console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`)
 }
 
 // Main event function handler
@@ -36,8 +51,8 @@ exports.main = async (req, res) => {
   let message;
   if (command === "/spend") {
     const { text } = body;
-    const { spendOk, spendData } = parseSpend(text);
-    console.log({ spendOk, spendData });
+    const { ok: spendOk, spendData } = parseSpend(text);
+    await handleSpend({ ok: spendOk, spendData });
     message = spendMessage({ ok: spendOk, spendData });
   } else {
     message = `Command ${command} not recognized`;

@@ -1,6 +1,8 @@
 imports:
 - path: deploy_function.py
+- path: slack_pubsub.jinja
 - path: handle_slack/index.js
+- path: handle_slack/package.json
 - path: budget_worker/budgets.js
 - path: budget_worker/index.js
 - path: budget_worker/package.json
@@ -20,6 +22,10 @@ resources:
     runtime: nodejs8
     availableMemoryMb: 256
     entryPoint: main
+- name: slack-pubsub
+  type: slack_pubsub.jinja
+  properties:
+    ackDeadlineSeconds: 4
 - name: handle-slack
   type: deploy_function.py
   properties:

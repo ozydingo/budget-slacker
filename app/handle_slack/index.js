@@ -1,6 +1,6 @@
 const { PubSub } = require("@google-cloud/pubsub");
 
-const APP_TOKEN = process.env.app_token;
+const APP_TOKEN = "FkMG5PVzNLX8o6KniWxLzD23";
 const PROJECT_ID = "budget-slacker";
 const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
 const PUBSUB_TOPIC = "slack-event";

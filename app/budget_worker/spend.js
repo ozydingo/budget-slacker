@@ -11,25 +11,14 @@ async function bail(promises, message) {
   await Promise.all(promises);
   return {
     ok: false,
-    message
+    error: message
   };
 }
 
-async function handleSpend(body) {
-  console.log("Handling spend command.");
+async function handleSpend({ expense, slackMessage }) {
   const promises = [];
-  const { response_url, team_id, text, user_name, user_id } = body;
+  const { response_url, team_id, text, user_name, user_id } = slackMessage;
   const timestamp = new Date();
-  const { ok, spendData } = parseSpend(text);
-  if (!ok) { return bail(promises, "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\""); }
-
-  console.log("Spend data:", spendData);
-  const { amount, category, note } = spendData;
-  const confirmationMessage = `Got it! You spent $${amount} on the category ${category}, with a note: ${note}`;
-  const confirmation = Slack.respond({ response_url, text: confirmationMessage }).then(response => {
-    console.log("Confirmation response:", response.status);
-  });
-  promises.push(confirmation);
 
   console.log("Fetching budget info");
   const budget = await Budget.find(team_id);
@@ -45,6 +34,8 @@ async function handleSpend(body) {
   const token_credentials = { access_token, refresh_token };
   const sheets = new Sheets(app_credentials, token_credentials);
 
+  const { amount, category, note } = expense;
+
   // Do this first to be sure we aren't waiting for the formula result to update
   const totals = await sheets.getTotals(spreadsheet_id);
   const total = Number(totals[category][0]) + Number(amount);
@@ -53,23 +44,15 @@ async function handleSpend(body) {
     console.log("Result response:", response.status);
   }));
 
-  await sheets.addExpense(
+  promise.push(sheets.addExpense(
     spreadsheet_id,
     { timestamp, user_id, user_name, amount, category, note }
-  );
+  ));
 
   await Promise.all(promises);
-  return {ok: true, message: confirmationMessage};
-}
-
-function parseSpend(text) {
-  const match = text.match(SPEND_PATTERN);
-  if (!match) { return {ok: false}; }
-  const [, amount, category, note] = match;
-  return {ok: true, spendData: {amount, category, note}};
+  return {ok: true};
 }
 
 module.exports = {
   handleSpend,
-  parseSpend,
 };

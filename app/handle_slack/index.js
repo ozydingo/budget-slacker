@@ -13,26 +13,22 @@ function parseSpend(text) {
   const match = text.match(SPEND_PATTERN);
   if (!match) { return {ok: false}; }
   const [, amount, category, note] = match;
-  return {ok: true, spendData: {amount, category, note}};
+  return {ok: true, expense: {amount, category, note}};
 }
 
-function spendMessage({ ok, spendData }) {
-  if (ok) {
-    return `$${spendData.amount} on ${spendData.category}, got it!`;
-  } else {
-    return "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\"";
-  }
-}
-
-async function handleSpend({ ok, spendData }) {
+async function handleSpend(body) {
   console.log("Handling spend command");
-  console.log({ ok, spendData });
-  if (!ok) { return; }
+  const { response_url, team_id, text, user_name, user_id } = body;
+  const { ok, expense } = parseSpend(text);
+  console.log({ ok, expense });
+  if (!ok) { return "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\""; }
 
+  const slackMessage = { response_url, team_id, user_name, user_id }
   const client = new PubSub({projectId: PROJECT_ID});
-  const dataBuffer = Buffer.from(JSON.stringify(spendData));
+  const dataBuffer = Buffer.from(JSON.stringify({ expense, slackMessage }));
   const messageId = await client.topic(PUBSUB_TOPIC).publish(dataBuffer);
   console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`);
+  return `$${expense.amount} on ${expense.category}, got it!`;
 }
 
 // Main event function handler
@@ -50,10 +46,7 @@ exports.main = async (req, res) => {
 
   let message;
   if (command === "/spend") {
-    const { text } = body;
-    const { ok: spendOk, spendData } = parseSpend(text);
-    await handleSpend({ ok: spendOk, spendData });
-    message = spendMessage({ ok: spendOk, spendData });
+    message = await handleSpend(body);
   } else {
     message = `Command ${command} not recognized`;
   }

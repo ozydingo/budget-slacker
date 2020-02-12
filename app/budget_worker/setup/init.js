@@ -1,10 +1,12 @@
 const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
+const {Sheets} = require("sheets");
+const sheets = new Sheets(secrets.app, secrets.oauth);
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
-// The file token.json stores the user's access and refresh tokens, and is
+// The file token.json xstores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = 'setup/token.json';

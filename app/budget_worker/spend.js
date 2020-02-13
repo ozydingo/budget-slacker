@@ -36,15 +36,18 @@ async function handleSpend({ expense, slackMessage }) {
 
   const { amount, category, note } = expense;
 
-  // Do this first to be sure we aren't waiting for the formula result to update
+  // Prioritize fase response: get totals and send confirmation first
+  // Use await to avoid race between getTotals and addExpense
   const totals = await sheets.getTotals(spreadsheet_id);
-  const total = Number(totals[category][0]) + Number(amount);
+  const totalForCategory = totals[category];
+  const previousTotal = totalForCategory && Number(totalForCategory[0]) || 0;
+  const total = previousTotal + amount;
   const resultMessage = `You've spent $${total} so far this month on ${category}`;
   promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
     console.log("Result response:", response.status);
   }));
 
-  promise.push(sheets.addExpense(
+  promises.push(sheets.addExpense(
     spreadsheet_id,
     { timestamp, user_id, user_name, amount, category, note }
   ));

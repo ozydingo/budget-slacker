@@ -41,7 +41,7 @@ async function handleSpend({ expense, slackMessage }) {
   const totals = await sheets.getTotals(spreadsheet_id);
   const totalForCategory = totals[category];
   const previousTotal = totalForCategory && Number(totalForCategory[0]) || 0;
-  const total = previousTotal + amount;
+  const total = previousTotal + Number(amount);
   const resultMessage = `You've spent $${total} so far this month on ${category}`;
   promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
     console.log("Result response:", response.status);

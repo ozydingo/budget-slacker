@@ -1,0 +1,3 @@
+#! /usr/bin/env bash
+
+gcloud deployment-manager deployments update budget-slacker --config budget-slacker.yml

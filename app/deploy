@@ -1,4 +1,4 @@
 #! /usr/bin/env bash
 
-gcloud deployment-manager deployments update budget-slacker --config budget-slacker.yml
-echo "Done! Be sure to log into the console and fill out the env variables."
+gcloud deployment-manager deployments update budget-slacker --config budget-slacker.yml $@
+[ $? -eq 0 ] && echo "Done! Be sure to log into the console and fill out the env variables."

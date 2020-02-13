@@ -2,7 +2,6 @@ const Budget = require("./budgets");
 const { Sheets } = require("./sheets");
 const Slack = require("./slack");
 
-const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
 const { client_id, client_secret } = process.env;
 const app_credentials = { client_id, client_secret };
 
@@ -17,7 +16,7 @@ async function bail(promises, message) {
 
 async function handleSpend({ expense, slackMessage }) {
   const promises = [];
-  const { response_url, team_id, text, user_name, user_id } = slackMessage;
+  const { response_url, team_id, user_name, user_id } = slackMessage;
   const timestamp = new Date();
 
   console.log("Fetching budget info");

@@ -10,7 +10,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/pubsub": "^1.5.0"
+    "@google-cloud/pubsub": "^1.5.0",
+    "@google-cloud/secret-manager": "^1.2.1"
   },
   "devDependencies": {
     "eslint": "^6.5.1",

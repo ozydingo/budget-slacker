@@ -22,8 +22,8 @@ exports.main = async (pubSubEvent) => {
       text: "Oh no! Something went wrong when adding this expense to the spreadsheet."
     }).then(response => {
       console.log("Error message response:", response.status);
-    })
-    return {ok: false, error: err.message}
+    });
+    return {ok: false, error: err.message};
   });
   console.log({ ok, error });
 };

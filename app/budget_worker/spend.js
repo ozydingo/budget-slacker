@@ -1,9 +1,19 @@
 const Budget = require("./budgets");
 const { Sheets } = require("./sheets");
 const Slack = require("./slack");
+const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 
-const { client_id, client_secret } = process.env;
-const app_credentials = { client_id, client_secret };
+const secretsClient = new SecretManagerServiceClient();
+function accessSecret(versionString) {
+  return secretsClient.accessSecretVersion({
+    name: versionString
+  }).then(response => {
+    return response[0].payload.data.toString("utf8");
+  });
+}
+const app_credentials_promise = accessSecret(
+  "projects/526411321629/secrets/sheets-api-credentials/versions/1"
+).then(JSON.parse);
 
 async function bail(promises, message) {
   console.log("Bailing out with message:", message);
@@ -31,6 +41,7 @@ async function handleSpend({ expense, slackMessage }) {
   console.log("Spreadsheet:", spreadsheet_id);
 
   const token_credentials = { access_token, refresh_token };
+  const app_credentials = await app_credentials_promise;
   const sheets = new Sheets(app_credentials, token_credentials);
 
   const { amount, category, note } = expense;

@@ -31,12 +31,17 @@ async function handleSpend(body) {
   console.log({ ok, expense });
   if (!ok) { return "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\""; }
 
-  const slackMessage = { response_url, team_id, user_name, user_id };
+  const { amount, category, note } = expense;
+  const data = { team_id, user_name, user_id, amount, category, note };
+  await publishEvent({ response_url, data });
+  return `$${expense.amount} on ${expense.category}, got it!`;
+}
+
+async function publishEvent(data) {
   const client = new PubSub({projectId: PROJECT_ID});
-  const dataBuffer = Buffer.from(JSON.stringify({ expense, slackMessage }));
+  const dataBuffer = Buffer.from(JSON.stringify(data));
   const messageId = await client.topic(PUBSUB_TOPIC).publish(dataBuffer);
   console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`);
-  return `$${expense.amount} on ${expense.category}, got it!`;
 }
 
 // Main event function handler

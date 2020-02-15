@@ -24,15 +24,14 @@ async function bail(promises, message) {
   };
 }
 
-async function handleSpend({ expense, slackMessage }) {
+async function handleSpend({ response_url, data }) {
   const promises = [];
-  const { response_url, team_id, user_name, user_id } = slackMessage;
+  const { team_id } = data;
   const timestamp = new Date();
 
   console.log("Fetching budget info");
   const budget = await Budget.find(team_id);
   if (!budget) { return bail(promises, "Unfortunately, I can't find this workspace's buduget."); }
-  console.log("Budget:", budget.data());
 
   const { access_token, refresh_token, spreadsheet_id } = budget.data();
   if (!access_token) { return bail(promises, "access_token is missing from this workspace!"); }
@@ -44,7 +43,7 @@ async function handleSpend({ expense, slackMessage }) {
   const app_credentials = await app_credentials_promise;
   const sheets = new Sheets(app_credentials, token_credentials);
 
-  const { amount, category, note } = expense;
+  const { user_name, user_id, amount, category, note } = data;
 
   // Prioritize fase response: get totals and send confirmation first
   // Use await to avoid race between getTotals and addExpense

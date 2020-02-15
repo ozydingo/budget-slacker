@@ -9,13 +9,12 @@ exports.main = async (pubSubEvent) => {
     return;
   }
 
-  const data = JSON.parse(Buffer.from(pubSubEvent.data, "base64").toString());
-  console.log("Got message:", data);
+  const message = JSON.parse(Buffer.from(pubSubEvent.data, "base64").toString());
+  console.log("Got message:", message);
 
-  const { expense, slackMessage } = data;
-  const { response_url } = slackMessage;
+  const { response_url, data } = message;
   const { ok, error } = await Spend.handleSpend(
-    { expense, slackMessage }
+    { response_url, data }
   ).catch(err => {
     Slack.respond({
       response_url,

@@ -33,7 +33,8 @@ async function handleSpend(body) {
 
   const { amount, category, note } = expense;
   const data = { team_id, user_name, user_id, amount, category, note };
-  await publishEvent({ response_url, data });
+  const command = "spend";
+  await publishEvent({ command, response_url, data });
   return `$${expense.amount} on ${expense.category}, got it!`;
 }
 

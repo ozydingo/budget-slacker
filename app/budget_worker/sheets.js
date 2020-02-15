@@ -204,10 +204,10 @@ class Sheets {
       range: `categories!B1:ZZ${HISTORY+1}`,
       majorDimension: "COLUMNS",
     });
-    const totals = {};
-    result.data.values.forEach(array => {
-      totals[array[0]] = array.slice(1).map(Number);
-    });
+    const totals = result.data.values.map(array => ({
+      category: array[0],
+      values: array.slice(1).map(Number)
+    }));
     return totals;
   }
 }

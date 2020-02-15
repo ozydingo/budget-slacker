@@ -43,8 +43,8 @@ async function handleSpend({ response_url, data }) {
   // Prioritize fast response: get totals and send confirmation first
   // Use await to avoid race between getTotals and addExpense
   const totals = await sheets.getTotals(spreadsheet_id);
-  const totalForCategory = totals[category];
-  const previousTotal = totalForCategory && Number(totalForCategory[0]) || 0;
+  const totalForCategory = totals.find(item => item.category === category);
+  const previousTotal = totalForCategory && Number(totalForCategory.values[0]) || 0;
   const total = previousTotal + Number(amount);
   const resultMessage = `You've spent $${total} so far this month on ${category}`;
 

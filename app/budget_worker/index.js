@@ -16,6 +16,10 @@ function router({ command, response_url, data }) {
     return Spend.handleSpend(
       { response_url, data }
     );
+  } else if (command === "budget") {
+    return Spend.report(
+      { response_url, data }
+    );
   }
 }
 

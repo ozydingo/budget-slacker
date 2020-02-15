@@ -24,6 +24,15 @@ function parseSpend(text) {
   return {ok: true, expense: {amount, category, note}};
 }
 
+async function handleBudget(body) {
+  console.log("Handling budget command");
+  const { response_url, team_id } = body;
+  const data = { team_id };
+  const command = "budget";
+  await publishEvent({ command, response_url, data });
+  return "Crunching the numbers, hang tight!";
+}
+
 async function handleSpend(body) {
   console.log("Handling spend command");
   const { response_url, team_id, text, user_name, user_id } = body;
@@ -62,6 +71,8 @@ exports.main = async (req, res) => {
   let message;
   if (command === "/spend") {
     message = await handleSpend(body);
+  } else if (command === "/budget") {
+    message = await handleBudget(body);
   } else {
     message = `Command ${command} not recognized`;
   }

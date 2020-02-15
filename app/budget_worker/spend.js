@@ -31,6 +31,23 @@ async function getBudgetInfo(team_id) {
   return { spreadsheet_id, app_credentials, token_credentials };
 }
 
+async function report({ response_url, data }) {
+  const { team_id } = data;
+  const { spreadsheet_id, app_credentials, token_credentials } = await getBudgetInfo(team_id);
+  const sheets = new Sheets(app_credentials, token_credentials);
+  const totals = await sheets.getTotals(spreadsheet_id);
+  totals.sort((a, b) => (b.values[0] - a.values[0]));
+  let resultMessage = "What you've spent so far this month:\n";
+  resultMessage += totals.filter(item => (
+    item.values[0] > 0
+  )).map(item => {
+    return `${item.category}: $${item.values[0]}`;
+  }).join("\n");
+
+  await Slack.respond({ response_url, text: resultMessage});
+  return {ok: true};
+}
+
 async function handleSpend({ response_url, data }) {
   const { team_id } = data;
   const timestamp = new Date();
@@ -67,4 +84,5 @@ async function handleSpend({ response_url, data }) {
 
 module.exports = {
   handleSpend,
+  report,
 };

@@ -1,6 +1,5 @@
 imports:
-- path: deploy_function.py
-- path: pubsub_function.py
+- path: cloud_function.py
 - path: handle_slack/index.js
 - path: handle_slack/package.json
 - path: budget_worker/budgets.js
@@ -16,7 +15,7 @@ resources:
   properties:
     topic: slack-event
 - name: budget-worker
-  type: pubsub_function.py
+  type: cloud_function.py
   properties:
     codeLocation: budget_worker
     codeBucket: budget-slacker-deploy
@@ -24,14 +23,13 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: nodejs8
+    trigger:
+      eventTrigger: slack-pubsub
     pubsub_topic: slack-pubsub
     availableMemoryMb: 256
     entryPoint: main
-    environmentVariables:
-      client_id: UNKNOWN
-      client_secret: UNKNOWN
 - name: handle-slack
-  type: deploy_function.py
+  type: cloud_function.py
   properties:
     codeLocation: handle_slack
     codeBucket: budget-slacker-deploy
@@ -39,10 +37,10 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: nodejs8
+    trigger:
+      httpsTrigger: true
     availableMemoryMb: 256
     entryPoint: main
-    environmentVariables:
-      app_token: UNKNOWN
 outputs:
 - name: handle-slack-url
   value: $(ref.handle-slack.url)

@@ -24,11 +24,13 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: nodejs8
+    trigger:
+      eventTrigger: slack-pubsub
     pubsub_topic: slack-pubsub
     availableMemoryMb: 256
     entryPoint: main
 - name: handle-slack
-  type: deploy_function.py
+  type: pubsub_function.py
   properties:
     codeLocation: handle_slack
     codeBucket: budget-slacker-deploy
@@ -36,6 +38,8 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: nodejs8
+    trigger:
+      httpsTrigger: true
     availableMemoryMb: 256
     entryPoint: main
 outputs:

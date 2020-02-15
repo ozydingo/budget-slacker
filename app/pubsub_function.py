@@ -123,22 +123,28 @@ def generate_cloud_function(ctx, source_archive_url, source_archive_hexdigest):
                 source_archive_url,
             'entryPoint':
                 ctx.properties['entryPoint'],
-            'eventTrigger': {
-                'resource': '$(ref.%s.name)' % (ctx.properties['pubsub_topic']),
-                'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'
-            },
             'timeout':
                 ctx.properties['timeout'],
             'availableMemoryMb':
                 ctx.properties['availableMemoryMb'],
             'runtime':
                 ctx.properties['runtime']
-            },
-        'metadata': {
-            'dependsOn': [build_step_name(ctx), ctx.properties['pubsub_topic']]
-        }
+            }
     }
-    
+    trigger = ctx.properties['trigger']
+    dependencies = [build_step_name(ctx)]
+    if 'httpsTrigger' in trigger:
+        cloud_function['properties']['httpsTrigger'] = {}
+    elif 'eventTrigger' in trigger:
+        cloud_function['properties']['eventTrigger'] = {
+            'resource': '$(ref.%s.name)' % (trigger['eventTrigger']),
+            'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'
+        }
+        trigger['eventTrigger']
+        dependencies.append(trigger['eventTrigger'])
+    cloud_function['metadata'] = {
+        'dependsOn': dependencies
+    }
     return cloud_function
 
 def GenerateConfig(ctx):
@@ -151,15 +157,22 @@ def GenerateConfig(ctx):
     )
 
     resources = [build_step, cloud_function]
+    
+    outputs = [{
+        'name': 'sourceArchiveUrl',
+        'value': build_step_meta['source_archive_url']
+    }, {
+        'name': 'name',
+        'value': '$(ref.' + function_name(ctx) + '.name)'
+    }]
+    
+    if 'httpsTrigger' in ctx.properties['trigger']:
+        outputs.append({
+            'name': 'url',
+            'value': '$(ref.' + function_name(ctx) + '.httpsTrigger.url)'
+        })
 
     return {
-        'resources':
-            resources,
-        'outputs': [{
-            'name': 'sourceArchiveUrl',
-            'value': build_step_meta['source_archive_url']
-        }, {
-            'name': 'name',
-            'value': '$(ref.' + function_name(ctx) + '.name)'
-        }]
+        'resources': resources,
+        'outputs': outputs
     }

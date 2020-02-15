@@ -15,7 +15,7 @@ const app_credentials_promise = accessSecret(
   "projects/526411321629/secrets/sheets-api-credentials/versions/1"
 ).then(JSON.parse);
 
-async function bail(promises, message) {
+async function bail(message, promises = []) {
   console.log("Bailing out with message:", message);
   await Promise.all(promises);
   return {
@@ -25,18 +25,17 @@ async function bail(promises, message) {
 }
 
 async function handleSpend({ response_url, data }) {
-  const promises = [];
   const { team_id } = data;
   const timestamp = new Date();
 
   console.log("Fetching budget info");
   const budget = await Budget.find(team_id);
-  if (!budget) { return bail(promises, "Unfortunately, I can't find this workspace's buduget."); }
+  if (!budget) { return bail("Unfortunately, I can't find this workspace's buduget."); }
 
   const { access_token, refresh_token, spreadsheet_id } = budget.data();
-  if (!access_token) { return bail(promises, "access_token is missing from this workspace!"); }
-  if (!refresh_token) { return bail(promises, "refresh_token is missing from this workspace!"); }
-  if (!spreadsheet_id) { return bail(promises, "spreadsheet_id is missing from this workspace!"); }
+  if (!access_token) { return bail("access_token is missing from this workspace!"); }
+  if (!refresh_token) { return bail("refresh_token is missing from this workspace!"); }
+  if (!spreadsheet_id) { return bail("spreadsheet_id is missing from this workspace!"); }
   console.log("Spreadsheet:", spreadsheet_id);
 
   const token_credentials = { access_token, refresh_token };
@@ -52,14 +51,19 @@ async function handleSpend({ response_url, data }) {
   const previousTotal = totalForCategory && Number(totalForCategory[0]) || 0;
   const total = previousTotal + Number(amount);
   const resultMessage = `You've spent $${total} so far this month on ${category}`;
-  promises.push(Slack.respond({ response_url, text: resultMessage }).then(response => {
-    console.log("Result response:", response.status);
-  }));
 
-  promises.push(sheets.addExpense(
-    spreadsheet_id,
-    { timestamp, user_id, user_name, amount, category, note }
-  ));
+  const promises = [];
+  promises.push(
+    Slack.respond({ response_url, text: resultMessage }).then(response => {
+      console.log("Result response:", response.status);
+    })
+  );
+  promises.push(
+    sheets.addExpense(
+      spreadsheet_id,
+      { timestamp, user_id, user_name, amount, category, note }
+    )
+  );
 
   await Promise.all(promises);
   return {ok: true};

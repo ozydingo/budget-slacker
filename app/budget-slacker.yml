@@ -27,9 +27,6 @@ resources:
     pubsub_topic: slack-pubsub
     availableMemoryMb: 256
     entryPoint: main
-    environmentVariables:
-      client_id: UNKNOWN
-      client_secret: UNKNOWN
 - name: handle-slack
   type: deploy_function.py
   properties:
@@ -41,8 +38,6 @@ resources:
     runtime: nodejs8
     availableMemoryMb: 256
     entryPoint: main
-    environmentVariables:
-      app_token: UNKNOWN
 outputs:
 - name: handle-slack-url
   value: $(ref.handle-slack.url)

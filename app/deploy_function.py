@@ -112,8 +112,7 @@ def GenerateConfig(ctx):
             'sourceArchiveUrl':
                 source_archive_url,
             'environmentVariables': {
-                'codeHash': m.hexdigest(),
-                **(ctx.properties['environmentVariables'] or {})
+                'codeHash': m.hexdigest()
             },
             'entryPoint':
                 ctx.properties['entryPoint'],

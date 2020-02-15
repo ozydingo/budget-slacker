@@ -18,11 +18,14 @@ import hashlib
 from io import BytesIO
 import zipfile
 
+def build_step_name(ctx):
+    return '%s-upload-function-code' % (ctx.env['name'])
 
-def GenerateConfig(ctx):
-    """Generate YAML resource configuration."""
+def function_name(ctx):
+    return ctx.env['name'] + '-function'
+
+def generate_build_step(ctx):
     in_memory_output_file = BytesIO()
-    function_name = ctx.env['name'] + '-function'
     zip_file = zipfile.ZipFile(
         in_memory_output_file,
         mode='w',
@@ -39,9 +42,10 @@ def GenerateConfig(ctx):
     content = base64.b64encode(in_memory_output_file.getvalue())
     m = hashlib.md5()
     m.update(content)
+    hexdigest = m.hexdigest()
     source_archive_url = 'gs://%s/%s' % (
         ctx.properties['codeBucket'],
-        m.hexdigest() + '.zip'
+        hexdigest + '.zip'
     )
     chunk_length = 3500
     content_chunks = [content[ii:ii+chunk_length] for ii in range(0,len(content), chunk_length)]
@@ -59,7 +63,7 @@ def GenerateConfig(ctx):
         for chunk in content_chunks[1:]
     ]
     volumes = [{
-        'name': 'code-%s' % (function_name),
+        'name': 'code-%s' % (function_name(ctx)),
         'path': '/%s' % (ctx.properties['codeLocation'])
     }]
     zip_steps = [
@@ -69,9 +73,8 @@ def GenerateConfig(ctx):
             'volumes': volumes,
         } for cmd in cmds
     ]
-    build_step_name = '%s-upload-function-code' % (ctx.env['name'])
     build_step = {
-        'name': build_step_name,
+        'name': build_step_name(ctx),
         'action': 'gcp-types/cloudbuild-v1:cloudbuild.projects.builds.create',
         'metadata': {
             'runtimePolicy': ['UPDATE_ON_CHANGE']
@@ -93,9 +96,16 @@ def GenerateConfig(ctx):
             '120s'
         }
     }
+    meta = {
+        'hexdigest': hexdigest,
+        'source_archive_url': source_archive_url
+    }
+    return build_step, meta
+
+def generate_cloud_function(ctx, source_archive_url, source_archive_hexdigest):
     cloud_function = {
         'type': 'gcp-types/cloudfunctions-v1:projects.locations.functions',
-        'name': function_name,
+        'name': function_name(ctx),
         'properties': {
             'parent':
                 '/'.join([
@@ -103,18 +113,14 @@ def GenerateConfig(ctx):
                     ctx.properties['location']
                 ]),
             'function':
-                function_name,
+                function_name(ctx),
             'labels': {
                 # Add the hash of the contents to trigger an update if the bucket
                 # object changes
-                'content-md5': m.hexdigest()
+                'content-md5': source_archive_hexdigest
              },
             'sourceArchiveUrl':
                 source_archive_url,
-            'environmentVariables': {
-                'codeHash': m.hexdigest(),
-                **(ctx.properties['environmentVariables'] or {})
-            },
             'entryPoint':
                 ctx.properties['entryPoint'],
             'eventTrigger': {
@@ -129,9 +135,21 @@ def GenerateConfig(ctx):
                 ctx.properties['runtime']
             },
         'metadata': {
-            'dependsOn': [build_step_name, ctx.properties['pubsub_topic']]
+            'dependsOn': [build_step_name(ctx), ctx.properties['pubsub_topic']]
         }
     }
+    
+    return cloud_function
+
+def GenerateConfig(ctx):
+    """Generate YAML resource configuration."""
+    build_step, build_step_meta = generate_build_step(ctx)
+    cloud_function = generate_cloud_function(
+        ctx,
+        source_archive_url=build_step_meta['source_archive_url'],
+        source_archive_hexdigest=build_step_meta['hexdigest']
+    )
+
     resources = [build_step, cloud_function]
 
     return {
@@ -139,9 +157,9 @@ def GenerateConfig(ctx):
             resources,
         'outputs': [{
             'name': 'sourceArchiveUrl',
-            'value': source_archive_url
+            'value': build_step_meta['source_archive_url']
         }, {
             'name': 'name',
-            'value': '$(ref.' + function_name + '.name)'
+            'value': '$(ref.' + function_name(ctx) + '.name)'
         }]
     }

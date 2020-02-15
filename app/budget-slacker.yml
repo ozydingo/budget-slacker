@@ -1,6 +1,5 @@
 imports:
-- path: deploy_function.py
-- path: pubsub_function.py
+- path: cloud_function.py
 - path: handle_slack/index.js
 - path: handle_slack/package.json
 - path: budget_worker/budgets.js
@@ -16,7 +15,7 @@ resources:
   properties:
     topic: slack-event
 - name: budget-worker
-  type: pubsub_function.py
+  type: cloud_function.py
   properties:
     codeLocation: budget_worker
     codeBucket: budget-slacker-deploy
@@ -30,7 +29,7 @@ resources:
     availableMemoryMb: 256
     entryPoint: main
 - name: handle-slack
-  type: pubsub_function.py
+  type: cloud_function.py
   properties:
     codeLocation: handle_slack
     codeBucket: budget-slacker-deploy

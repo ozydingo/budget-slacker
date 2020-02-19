@@ -23,9 +23,17 @@ async function getAppCredentials(versionString = CREDENTIALS_SECRET) {
 // Do this on function initializaion; it doesn't change.
 const credentialsPromise = getAppCredentials();
 
-async function main(team_id) {
+async function findTeamRecord(team_id) {
+  const result = await collection.where(
+    "team_id", "==", String(team_id)
+  ).limit(1).get();
+  return result.docs[0];
+}
+
+async function main(req, res) {
+  const {team_id} = req.body;
   console.log("Fetching budget info");
-  const budget = await Budget.find(team_id);
+  const budget = await findTeamRecord(team_id);
   if (!budget) { throw Error(`Budget not found for team ${team_id}!`); }
 
   const { access_token, refresh_token, spreadsheet_id } = budget.data();
@@ -35,8 +43,9 @@ async function main(team_id) {
   console.log("Spreadsheet:", spreadsheet_id);
   const token_credentials = { access_token, refresh_token };
   const app_credentials = await credentialsPromise;
+  const data = { spreadsheet_id, app_credentials, token_credentials };
 
-  return { spreadsheet_id, app_credentials, token_credentials };
+  res.status(200).send(JSON.stringify(data));
 }
 
 module.exports = {

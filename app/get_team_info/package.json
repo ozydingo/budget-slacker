@@ -1,0 +1,21 @@
+{
+  "name": "get_team_innfo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint . ;:",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/firestore": "^2.4.0",
+    "@google-cloud/secret-manager": "^1.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.5.1",
+    "eslint-plugin-jest": "^22.20.1",
+    "jest": "^24.9.0"
+  }
+}

@@ -1,0 +1,10 @@
+resources:
+  - name: {{ env['name'] }}
+    action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
+    properties:
+      resource: {{ properties['function'] }}
+      policy:
+        bindings:
+          - members:
+            - serviceAccount:{{ env['project'] }}@appspot.gserviceaccount.com
+            role: "roles/cloudfunctions.invoker"

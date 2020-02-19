@@ -20,15 +20,15 @@ function sheetClient({app_credentials, tokens}) {
     client_id,
     client_secret,
   );
-  client.setCredentials(token);
+  client.setCredentials(tokens);
 
   const sheets = google.sheets({version: "v4", auth: client});
   return sheets;
 }
 
-async function getTotals({sheets, spreadsheetId}) {
+async function getTotals({sheets, spreadsheet_id}) {
   const result = await sheets.spreadsheets.values.get({
-    spreadsheetId,
+    spreadsheetId: spreadsheet_id,
     range: `categories!B1:ZZ${HISTORY+1}`,
     majorDimension: "COLUMNS",
   });
@@ -36,6 +36,7 @@ async function getTotals({sheets, spreadsheetId}) {
     category: array[0],
     values: array.slice(1).map(Number)
   }));
+  return totals
 }
 
 async function addExpense({sheets, spreadsheetId, expense}) {
@@ -58,7 +59,7 @@ async function addExpense({sheets, spreadsheetId, expense}) {
 }
 
 async function main(req, res) {
-  const { action, app_credentials, tokens, spreadsheet_id } = body;
+  const { action, app_credentials, tokens, spreadsheet_id } = req.body;
   const sheets = sheetClient({app_credentials, tokens});
   if (action === "get_totals") {
     const totals = await getTotals({sheets, spreadsheet_id});
@@ -66,11 +67,11 @@ async function main(req, res) {
   } else if (actiono === "add_expense") {
     const {expense} = body;
     await addExpense({sheets, spreadsheetId, expense});
-    res.status(200).send({ok: true};
+    res.status(200).send({ok: true});
   } else {
     const msg = `Unknoown action ${action}`;
     console.error(msg);
-    res.status(404).send(msg);
+    res.status(400).send(msg);
     return;
   }
 }

@@ -77,3 +77,22 @@ From `https://cloudfunctions.googleapis.com/v1/{resource}:getIamPolicy`, we get:
 We should therefore call `setIamPolicy` to remove this. This isn't great since there's a brief second where the function is exposed. Perhaps we can create the function, update the IamPolicy, *then* add the code. This would be called at `curl -X GET https://cloudfunctions.googleapis.com/v1/projects/budget-slacker/locations/us-east1/functions/get-team-info-function:getIamPolicy`
 
 To do this in the template, we give `526411321629@cloudbuild.gserviceaccount.com` Cloud Function Admin permissions.
+
+## Oauth
+
+Add the following
+
+```
+client.on('tokens', console.log)
+```
+
+logged output:
+
+```
+{
+  access_token: 'ya29.a0Adw1xeXnn_K9iqSew3J7MULdsbIKdPk_yGU6VxHQVSRaG7OKyII3fNhVLPnugiBWvNGDGjGFi8lTzMgZhhw13mrxXL-iYOtL2j5E5Kh3Ly7SikUlSoDDZ-gDxk4xXRVeHkZhxqrHmFM5bacr7DVBHDxKijPsUQRdDtQcVw',
+  scope: 'https://www.googleapis.com/auth/drive.file',
+  token_type: 'Bearer',
+  expiry_date: 1582117893645
+}
+```

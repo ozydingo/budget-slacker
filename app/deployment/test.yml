@@ -1,6 +1,8 @@
 imports:
 - path: cloud_function.py
 - path: private_function_policy.jinja
+- path: ../add_expense/index.js
+- path: ../add_expense/package.json
 - path: ../get_team_info/index.js
 - path: ../get_team_info/package.json
 - path: ../get_totals/index.js
@@ -40,6 +42,23 @@ resources:
   type: private_function_policy.jinja
   properties:
     function: $(ref.get-totals.name)
+- name: add-expense
+  type: cloud_function.py
+  properties:
+    codeLocation: ../add_expense
+    codeBucket: budget-slacker-deploy
+    codeBucketObject: add_expense.zip
+    location: us-east1
+    timeout: 60s
+    runtime: nodejs8
+    availableMemoryMb: 256
+    entryPoint: main
+    trigger:
+      httpsTrigger: {}
+- name: add-expense-policy
+  type: private_function_policy.jinja
+  properties:
+    function: $(ref.add-expense.name)
 outputs:
 - name: get-team-info-name
   value: $(ref.get-team-info.name)

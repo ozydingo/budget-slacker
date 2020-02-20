@@ -1,6 +1,6 @@
 imports:
 - path: cloud_function.py
-- path: private_function_policy.jinja
+- path: budget_slacker_function.jinja
 - path: ../add_expense/index.js
 - path: ../add_expense/package.json
 - path: ../get_team_info/index.js
@@ -9,58 +9,21 @@ imports:
 - path: ../get_totals/package.json
 resources:
 - name: get-team-info
-  type: cloud_function.py
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: ../get_team_info
-    codeBucket: budget-slacker-deploy
-    codeBucketObject: get_team_info.zip
-    location: us-east1
-    timeout: 60s
-    runtime: nodejs8
-    availableMemoryMb: 256
-    entryPoint: main
-    trigger:
-      httpsTrigger: {}
-- name: get-team-info-policy
-  type: private_function_policy.jinja
-  properties:
-    function: $(ref.get-team-info.name)
 - name: get-totals
-  type: cloud_function.py
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: ../get_totals
-    codeBucket: budget-slacker-deploy
-    codeBucketObject: get_totals.zip
-    location: us-east1
-    timeout: 60s
-    runtime: nodejs8
-    availableMemoryMb: 256
-    entryPoint: main
-    trigger:
-      httpsTrigger: {}
-- name: get-totals-policy
-  type: private_function_policy.jinja
-  properties:
-    function: $(ref.get-totals.name)
 - name: add-expense
-  type: cloud_function.py
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: ../add_expense
-    codeBucket: budget-slacker-deploy
-    codeBucketObject: add_expense.zip
-    location: us-east1
-    timeout: 60s
-    runtime: nodejs8
-    availableMemoryMb: 256
-    entryPoint: main
-    trigger:
-      httpsTrigger: {}
-- name: add-expense-policy
-  type: private_function_policy.jinja
-  properties:
-    function: $(ref.add-expense.name)
 outputs:
-- name: get-team-info-name
-  value: $(ref.get-team-info.name)
+- name: add-expense-url
+  value: $(ref.add-expense.url)
 - name: get-team-info-url
   value: $(ref.get-team-info.url)
+- name: get-totals-url
+  value: $(ref.get-totals.url)

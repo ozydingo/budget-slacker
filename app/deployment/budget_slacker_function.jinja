@@ -1,0 +1,26 @@
+resources:
+  - name: {{ env['name'] }}
+    type: cloud_function.py
+    properties:
+      codeLocation: {{ properties['codeLocation'] }}
+      codeBucket: budget-slacker-deploy
+      codeBucketObject: {{ env['name'] }}.zip
+      location: us-east1
+      timeout: 60s
+      runtime: nodejs8
+      availableMemoryMb: 256
+      entryPoint: main
+      trigger:
+        httpsTrigger: {}
+  - name: {{ env['name'] }}-policy
+    action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
+    properties:
+      resource: $(ref.{{ env['name'] }}.name)
+      policy:
+        bindings:
+          - members:
+            - serviceAccount:{{ env['project'] }}@appspot.gserviceaccount.com
+            role: "roles/cloudfunctions.invoker"
+outputs:
+  - name: url
+    value: $(ref.{{ env['name'] }}.url)

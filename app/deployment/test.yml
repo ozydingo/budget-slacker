@@ -7,7 +7,27 @@ imports:
 - path: ../get_team_info/package.json
 - path: ../get_totals/index.js
 - path: ../get_totals/package.json
+- path: ../handle_pubsub_message/index.js
+- path: ../handle_pubsub_message/package.json
 resources:
+- name: slack-pubsub
+  type: gcp-types/pubsub-v1:projects.topics
+  properties:
+    topic: budget-slacker
+- name: handle-pubsub-message
+  type: cloud_function.py
+  properties:
+    codeLocation: ../handle_pubsub_message
+    codeBucket: budget-slacker-deploy
+    codeBucketObject: budget_worker.zip
+    location: us-east1
+    timeout: 60s
+    runtime: nodejs8
+    trigger:
+      eventTrigger: slack-pubsub
+    pubsub_topic: slack-pubsub
+    availableMemoryMb: 256
+    entryPoint: main
 - name: get-team-info
   type: budget_slacker_function.jinja
   properties:

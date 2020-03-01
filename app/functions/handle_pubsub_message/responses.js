@@ -1,4 +1,5 @@
 function reportTotals({totals}) {
+  if (totals.length === 0) { return "Youu haven't spend anything this month yet!"; }
   totals.sort((a, b) => (b.values[0] - a.values[0]));
   let text = "What you've spent so far this month:\n";
   text += totals.filter(item => (

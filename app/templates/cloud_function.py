@@ -128,7 +128,9 @@ def generate_cloud_function(ctx, source_archive_url, source_archive_hexdigest):
             'availableMemoryMb':
                 ctx.properties['availableMemoryMb'],
             'runtime':
-                ctx.properties['runtime']
+                ctx.properties['runtime'],
+            'environmentVariables':
+                ctx.properties['environmentVariables'] or {}
             }
     }
     trigger = ctx.properties['trigger']

@@ -19,6 +19,10 @@ resources:
     codeLocation: functions/handle_pubsub_message
     trigger:
       eventTrigger: slack-pubsub
+    environmentVariables:
+      addExpenseUrl: $(ref.add-expense.url)
+      getTeamInfoUrl: $(ref.get-team-info.url)
+      getTotalsUrl: $(ref.get-totals.url)
 - name: get-team-info
   type: templates/budget_slacker_function.jinja
   properties:

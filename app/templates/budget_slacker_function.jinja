@@ -18,6 +18,8 @@ resources:
       entryPoint: main
       trigger:
         {{ trigger }}
+      environmentVariables:
+        {{ properties['environmentVariables'] or {} }}
   - name: {{ name }}-policy
     action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
     properties:

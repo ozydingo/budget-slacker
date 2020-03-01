@@ -1,0 +1,49 @@
+imports:
+- path: templates/cloud_function.py
+- path: templates/budget_slacker_function.jinja
+- path: functions/add_expense/index.js
+- path: functions/add_expense/package.json
+- path: functions/get_team_info/index.js
+- path: functions/get_team_info/package.json
+- path: functions/get_totals/index.js
+- path: functions/get_totals/package.json
+- path: functions/handle_pubsub_message/index.js
+- path: functions/handle_pubsub_message/package.json
+resources:
+- name: slack-pubsub
+  type: gcp-types/pubsub-v1:projects.topics
+  properties:
+    topic: budget-slacker
+- name: handle-pubsub-message
+  type: templates/cloud_function.py
+  properties:
+    codeLocation: functions/handle_pubsub_message
+    codeBucket: budget-slacker-deploy
+    codeBucketObject: budget_worker.zip
+    location: us-east1
+    timeout: 60s
+    runtime: nodejs8
+    trigger:
+      eventTrigger: slack-pubsub
+    pubsub_topic: slack-pubsub
+    availableMemoryMb: 256
+    entryPoint: main
+- name: get-team-info
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: functions/get_team_info
+- name: get-totals
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: functions/get_totals
+- name: add-expense
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: functions/add_expense
+outputs:
+- name: add-expense-url
+  value: $(ref.add-expense.url)
+- name: get-team-info-url
+  value: $(ref.get-team-info.url)
+- name: get-totals-url
+  value: $(ref.get-totals.url)

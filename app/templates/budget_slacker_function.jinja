@@ -1,6 +1,6 @@
 resources:
   - name: {{ env['name'] }}
-    type: cloud_function.py
+    type: templates/cloud_function.py
     properties:
       codeLocation: {{ properties['codeLocation'] }}
       codeBucket: budget-slacker-deploy

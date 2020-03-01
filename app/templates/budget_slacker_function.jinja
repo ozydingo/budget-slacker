@@ -1,3 +1,5 @@
+{% set trigger = properties['trigger'] or {'httpsTrigger': {}} %}
+
 resources:
   - name: {{ env['name'] }}
     type: templates/cloud_function.py
@@ -11,11 +13,7 @@ resources:
       availableMemoryMb: 256
       entryPoint: main
       trigger:
-        {% if properties['trigger'] %}
-        {{ properties['trigger'] }}
-        {% else %}
-        httpsTrigger: {}
-        {% endif %}
+        {{ trigger }}
   - name: {{ env['name'] }}-policy
     action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
     properties:
@@ -25,7 +23,8 @@ resources:
           - members:
             - serviceAccount:{{ env['project'] }}@appspot.gserviceaccount.com
             role: "roles/cloudfunctions.invoker"
-{% if not 'trigger' in properties or 'httpsTrigger' in properties['trigger'] %}
+
+{% if 'httpsTrigger' in trigger %}
 outputs:
   - name: url
     value: $(ref.{{ env['name'] }}.url)

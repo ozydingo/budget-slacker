@@ -53,11 +53,11 @@ function messageSlack({ response_url, text, response_type = "ephemeral" }) {
 
 function router({ command, data }) {
   if (command === "budget") {
-    invokeFunction(process.env.getTotalsUrl, data);
+    return invokeFunction(process.env.getTotalsUrl, data);
   } else if (command === "spend") {
-    invokeFunction(process.env.addExpenseUrl, data);
+    return invokeFunction(process.env.addExpenseUrl, data);
   } else {
-    throw new Error("Unrecognized command " + command);
+    return Promise.reject("Unrecognized command " + command);
   }
 }
 

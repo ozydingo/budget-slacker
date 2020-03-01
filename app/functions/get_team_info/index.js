@@ -41,9 +41,9 @@ async function main(req, res) {
   if (!refresh_token) { throw Error(`refresh_token is missing for team ${team_id}!`); }
   if (!spreadsheet_id) { throw Error(`spreadsheet_id is missing for team ${team_id}!`); }
   console.log("Spreadsheet:", spreadsheet_id);
-  const token_credentials = { access_token, refresh_token };
+  const tokens = { access_token, refresh_token };
   const app_credentials = await credentialsPromise;
-  const data = { spreadsheet_id, app_credentials, token_credentials };
+  const data = { spreadsheet_id, app_credentials, tokens };
 
   res.status(200).send(JSON.stringify(data));
 }

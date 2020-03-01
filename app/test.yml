@@ -9,7 +9,9 @@ imports:
 - path: functions/get_totals/index.js
 - path: functions/get_totals/package.json
 - path: functions/handle_pubsub_message/index.js
+- path: functions/handle_pubsub_message/invoke_function.js
 - path: functions/handle_pubsub_message/package.json
+- path: functions/handle_pubsub_message/responses.js
 - path: functions/handle_slack/index.js
 - path: functions/handle_slack/package.json
 resources:

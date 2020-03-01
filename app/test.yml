@@ -15,19 +15,11 @@ resources:
   properties:
     topic: budget-slacker
 - name: handle-pubsub-message
-  type: templates/cloud_function.py
+  type: templates/budget_slacker_function.jinja
   properties:
     codeLocation: functions/handle_pubsub_message
-    codeBucket: budget-slacker-deploy
-    codeBucketObject: budget_worker.zip
-    location: us-east1
-    timeout: 60s
-    runtime: nodejs8
     trigger:
       eventTrigger: slack-pubsub
-    pubsub_topic: slack-pubsub
-    availableMemoryMb: 256
-    entryPoint: main
 - name: get-team-info
   type: templates/budget_slacker_function.jinja
   properties:

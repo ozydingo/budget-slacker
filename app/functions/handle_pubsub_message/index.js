@@ -22,13 +22,14 @@ async function invokeFunction(url, data){
     "Content-type": "application/json",
   };
 
+  console.log(`Invoking function at ${url} with data`, data);
   const response = await axios({
     method: "POST",
     url,
     headers,
     data,
   });
-  console.log(response.data);
+  console.log("Response: ", response.data);
 
   return response.data;
 }
@@ -51,11 +52,19 @@ function messageSlack({ response_url, text, response_type = "ephemeral" }) {
   });
 }
 
-function router({ command, data }) {
+function getTeamInfo(team_id) {
+  console.log(`Getting team info for ${team_id}`);
+  return invokeFunction(process.env.getTeamInfoUrl, {team_id});
+}
+
+async function router({ command, data }) {
   if (command === "budget") {
-    return invokeFunction(process.env.getTotalsUrl, data);
+    const teamInfo = await getTeamInfo(data.team_id);
+    return invokeFunction(process.env.getTotalsUrl, teamInfo);
   } else if (command === "spend") {
-    return invokeFunction(process.env.addExpenseUrl, data);
+    const teamInfo = await getTeamInfo(data.team_id);
+    const sendData = {...teamInfo, expense: data};
+    return invokeFunction(process.env.addExpenseUrl, sendData);
   } else {
     return Promise.reject("Unrecognized command " + command);
   }
@@ -75,7 +84,7 @@ async function main(pubSubEvent) {
   await router(
     { command, data }
   ).then(response => {
-    console.log("Response: " + response.data);
+    console.log("Response:", response);
   }).catch(err => {
     reportError(err, response_url);
   });

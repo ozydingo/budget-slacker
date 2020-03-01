@@ -39,9 +39,10 @@ async function handleSpend(body) {
   const { ok, expense } = parseSpend(text);
   console.log({ ok, expense });
   if (!ok) { return "Invalid command format. Use \"$AMOUNT on CATEGORY: NOTE\""; }
+  const timestamp = (new Date()).getTime();
 
   const { amount, category, note } = expense;
-  const data = { team_id, user_name, user_id, amount, category, note };
+  const data = { timestamp, team_id, user_name, user_id, amount, category, note };
   const command = "spend";
   await publishEvent({ command, response_url, data });
   return `$${expense.amount} on ${expense.category}, got it!`;

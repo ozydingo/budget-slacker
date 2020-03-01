@@ -1,6 +1,7 @@
 imports:
 - path: templates/cloud_function.py
 - path: templates/budget_slacker_function.jinja
+- path: templates/pubsub_topic.jinja
 - path: functions/add_expense/index.js
 - path: functions/add_expense/package.json
 - path: functions/get_team_info/index.js
@@ -11,9 +12,7 @@ imports:
 - path: functions/handle_pubsub_message/package.json
 resources:
 - name: slack-pubsub
-  type: gcp-types/pubsub-v1:projects.topics
-  properties:
-    topic: budget-slacker
+  type: templates/pubsub_topic.jinja
 - name: handle-pubsub-message
   type: templates/budget_slacker_function.jinja
   properties:

@@ -45,9 +45,8 @@ async function addExpense({sheets, spreadsheet_id, expense}) {
 }
 
 async function main(req, res) {
-  const { app_credentials, tokens, spreadsheet_id } = req.body;
+  const { app_credentials, tokens, spreadsheet_id, expense } = req.body;
   const sheets = sheetClient({app_credentials, tokens});
-  const {expense} = body;
   await addExpense({sheets, spreadsheet_id, expense});
   res.status(200).send({ok: true});
 }

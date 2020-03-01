@@ -1,7 +1,11 @@
+{% set name = env['deployment'] + '-' + env['name'] %}
 {% set trigger = properties['trigger'] or {'httpsTrigger': {}} %}
 
+{% set function_name = name + "-function" %}
+{% set policy_name = name + "-policy" %}
+
 resources:
-  - name: {{ env['name'] }}
+  - name: {{ name }}
     type: templates/cloud_function.py
     properties:
       codeLocation: {{ properties['codeLocation'] }}
@@ -14,10 +18,10 @@ resources:
       entryPoint: main
       trigger:
         {{ trigger }}
-  - name: {{ env['name'] }}-policy
+  - name: {{ name }}-policy
     action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
     properties:
-      resource: $(ref.{{ env['name'] }}.name)
+      resource: $(ref.{{ name }}.name)
       policy:
         bindings:
           - members:
@@ -27,5 +31,5 @@ resources:
 {% if 'httpsTrigger' in trigger %}
 outputs:
   - name: url
-    value: $(ref.{{ env['name'] }}.url)
+    value: $(ref.{{ name }}.url)
 {% endif %}

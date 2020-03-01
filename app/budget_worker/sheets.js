@@ -107,7 +107,7 @@ class Sheets {
     const categoryHeaderValues = {
       range: "categories!B1",
       values: [
-        ["=TRANSPOSE(UNIQUE(expenses!$E$2:$E))"]
+        ["=TRANSPOSE(UNIQUE(ARRAYFORMULA(LOWER(expenses!$E$2:$E))))"]
       ]
     };
     const thisMonthValues = {

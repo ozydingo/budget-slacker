@@ -11,7 +11,7 @@ function reportTotals({totals}) {
 
 function confirmExpense({totals, expense}) {
   const { amount, category } = expense;
-  const totalForCategory = totals.find(item => item.category === category);
+  const totalForCategory = totals.find(item => item.category.toLowerCase() === category.toLowerCase());
   const previousTotal = totalForCategory && Number(totalForCategory.values[0]) || 0;
   const total = previousTotal + Number(amount);
   const text = `You've spent $${total} so far this month on ${category}`;

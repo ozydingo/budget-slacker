@@ -10,9 +10,18 @@ imports:
 - path: functions/get_totals/package.json
 - path: functions/handle_pubsub_message/index.js
 - path: functions/handle_pubsub_message/package.json
+- path: functions/handle_slack/index.js
+- path: functions/handle_slack/package.json
 resources:
 - name: slack-pubsub
   type: templates/pubsub_topic.jinja
+- name: handle-slack
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: functions/handle_slack
+    environmentVariables:
+      pubsub_topic: $(ref.slack-pubsub.name)
+    public: true
 - name: handle-pubsub-message
   type: templates/budget_slacker_function.jinja
   properties:
@@ -36,9 +45,5 @@ resources:
   properties:
     codeLocation: functions/add_expense
 outputs:
-- name: add-expense-url
-  value: $(ref.add-expense.url)
-- name: get-team-info-url
-  value: $(ref.get-team-info.url)
-- name: get-totals-url
-  value: $(ref.get-totals.url)
+- name: handle-slack-url
+  value: $(ref.handle-slack.url)

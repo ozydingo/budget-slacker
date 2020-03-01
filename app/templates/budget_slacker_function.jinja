@@ -27,7 +27,11 @@ resources:
       policy:
         bindings:
           - members:
+            {% if properties['public'] %}
+            - allUsers
+            {% else %}
             - serviceAccount:{{ env['project'] }}@appspot.gserviceaccount.com
+            {% endif %}
             role: "roles/cloudfunctions.invoker"
 
 {% if 'httpsTrigger' in trigger %}

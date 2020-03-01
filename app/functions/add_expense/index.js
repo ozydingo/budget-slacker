@@ -26,8 +26,9 @@ function sheetClient({app_credentials, tokens}) {
 }
 
 async function addExpense({sheets, spreadsheet_id, expense}) {
+  const time = new Date(expense.timestamp);
   const values = [
-    epochToDatetime(expense.timestamp),
+    epochToDatetime(time),
     expense.user_id,
     expense.user_name,
     expense.amount,
@@ -37,7 +38,7 @@ async function addExpense({sheets, spreadsheet_id, expense}) {
 
   console.log("Appending row with", values);
   return sheets.spreadsheets.values.append({
-    spreadsheet_id,
+    spreadsheetId: spreadsheet_id,
     range: EXPENSE_RANGE,
     valueInputOption: "USER_ENTERED",
     requestBody: { values: [values] },

@@ -3,7 +3,7 @@ const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 
 const COLLECTION_NAME = "budgets";
 const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/1";
-const PROJECTID = "budget-slacker";
+const PROJECTID = process.env.GCP_PROJECT;
 
 const firestore = new Firestore({
   projectId: PROJECTID,

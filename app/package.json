@@ -1,0 +1,14 @@
+{
+  "name": "handle_slack",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint ."
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^6.5.1"
+  }
+}

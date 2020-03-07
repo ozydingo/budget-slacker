@@ -26,7 +26,7 @@ async function getTotals({sheets, spreadsheet_id}) {
     category: array[0],
     values: array.slice(1).map(Number)
   }));
-  return totals
+  return totals;
 }
 
 async function main(req, res) {

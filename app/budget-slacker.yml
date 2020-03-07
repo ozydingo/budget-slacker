@@ -1,39 +1,21 @@
 imports:
-- path: templates/cloud_function.py
 - path: templates/budget_slacker_function.jinja
 - path: templates/pubsub_topic.jinja
-- path: functions/add_expense/index.js
-- path: functions/add_expense/package.json
-- path: functions/get_team_info/index.js
-- path: functions/get_team_info/package.json
-- path: functions/get_totals/index.js
-- path: functions/get_totals/package.json
-- path: functions/handle_pubsub_message/index.js
-- path: functions/handle_pubsub_message/invoke_function.js
-- path: functions/handle_pubsub_message/package.json
-- path: functions/handle_pubsub_message/responses.js
-- path: functions/handle_slack/index.js
-- path: functions/handle_slack/package.json
-- path: functions/request_oauth/index.js
-- path: functions/request_oauth/package.json
-- path: functions/request_oauth/responses.js
-- path: functions/store_oauth/index.js
-- path: functions/store_oauth/package.json
 resources:
 - name: slack-pubsub
   type: templates/pubsub_topic.jinja
 - name: handle-slack
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/handle_slack
+    codeLocation: app/functions/handle_slack
+    public: true
     environmentVariables:
       pubsub_topic: $(ref.slack-pubsub.name)
       requestOauthUrl: $(ref.request-oauth.url)
-    public: true
 - name: handle-pubsub-message
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/handle_pubsub_message
+    codeLocation: app/functions/handle_pubsub_message
     trigger:
       eventTrigger: slack-pubsub
     environmentVariables:
@@ -43,26 +25,26 @@ resources:
 - name: get-team-info
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/get_team_info
+    codeLocation: app/functions/get_team_info
 - name: get-totals
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/get_totals
+    codeLocation: app/functions/get_totals
 - name: add-expense
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/add_expense
+    codeLocation: app/functions/add_expense
 - name: request-oauth
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/request_oauth
+    codeLocation: app/functions/request_oauth
     public: true
     environmentVariables:
       storeOauthUrl: $(ref.store-oauth.url)
 - name: store-oauth
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/store_oauth
+    codeLocation: app/functions/store_oauth
     public: true
 outputs:
 - name: handle-slack-url

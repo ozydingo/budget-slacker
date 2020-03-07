@@ -1,29 +1,37 @@
+{% set location = 'us-east1' %}
 {% set name = env['deployment'] + '-' + env['name'] %}
 {% set trigger = properties['trigger'] or {'httpsTrigger': {}} %}
+{% set sourceRepoUrl = 'https://source.developers.google.com/projects/budget-slacker/repos/budget-slacker/moveable-aliases/master/paths/' + properties['codeLocation'] %}
+{% set location = 'projects/' +  env['project'] + "/locations/" + location %}
 
 {% set function_name = name + "-function" %}
 {% set policy_name = name + "-policy" %}
 
 resources:
-  - name: {{ name }}
-    type: templates/cloud_function.py
+  - name: {{ function_name }}
+    type: gcp-types/cloudfunctions-v1:projects.locations.functions
     properties:
-      codeLocation: {{ properties['codeLocation'] }}
-      codeBucket: budget-slacker-deploy
-      codeBucketObject: {{ env['name'] }}.zip
-      location: us-east1
+      function: {{ function_name }}
+      sourceRepository:
+        url: {{ sourceRepoUrl }}
+      parent: {{ location }}
       timeout: 60s
       runtime: nodejs8
       availableMemoryMb: 256
       entryPoint: main
-      trigger:
-        {{ trigger }}
+      {% if 'httpsTrigger' in trigger %}
+      httpsTrigger: {}
+      {% elif 'eventTrigger' in trigger %}
+      eventTrigger:
+        resource: $(ref.{{ trigger['eventTrigger'] }}.name)
+        eventType: providers/cloud.pubsub/eventTypes/topic.publish
+      {% endif %}
       environmentVariables:
         {{ properties['environmentVariables'] or {} }}
   - name: {{ name }}-policy
     action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
     properties:
-      resource: $(ref.{{ name }}.name)
+      resource: $(ref.{{ function_name }}.name)
       policy:
         bindings:
           - members:
@@ -37,5 +45,5 @@ resources:
 {% if 'httpsTrigger' in trigger %}
 outputs:
   - name: url
-    value: $(ref.{{ name }}.url)
+    value: $(ref.{{ function_name }}.httpsTrigger.url)
 {% endif %}

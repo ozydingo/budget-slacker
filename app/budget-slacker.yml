@@ -14,6 +14,11 @@ imports:
 - path: functions/handle_pubsub_message/responses.js
 - path: functions/handle_slack/index.js
 - path: functions/handle_slack/package.json
+- path: functions/request_oauth/index.js
+- path: functions/request_oauth/package.json
+- path: functions/request_oauth/responses.js
+- path: functions/store_oauth/index.js
+- path: functions/store_oauth/package.json
 resources:
 - name: slack-pubsub
   type: templates/pubsub_topic.jinja
@@ -23,6 +28,7 @@ resources:
     codeLocation: functions/handle_slack
     environmentVariables:
       pubsub_topic: $(ref.slack-pubsub.name)
+      requestOauthUrl: $(ref.request-oauth.url)
     public: true
 - name: handle-pubsub-message
   type: templates/budget_slacker_function.jinja
@@ -46,6 +52,22 @@ resources:
   type: templates/budget_slacker_function.jinja
   properties:
     codeLocation: functions/add_expense
+- name: request-oauth
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: functions/request_oauth
+    public: true
+    environmentVariables:
+      storeOauthUrl: $(ref.store-oauth.url)
+- name: store-oauth
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: functions/store_oauth
+    public: true
 outputs:
 - name: handle-slack-url
   value: $(ref.handle-slack.url)
+- name: request-oauth-url
+  value: $(ref.request-oauth.url)
+- name: store-oauth-url
+  value: $(ref.store-oauth.url)

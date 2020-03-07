@@ -1,17 +1,15 @@
 {
-  "name": "handle_slack",
+  "name": "authorize",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint . ;:",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/pubsub": "^1.5.0",
-    "@google-cloud/secret-manager": "^1.2.1",
-    "axios": "^0.19.2"
+    "@google-cloud/secret-manager": "^2.0.1",
+    "googleapis": "^47.0.0"
   }
 }

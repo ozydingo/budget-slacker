@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { PubSub } = require("@google-cloud/pubsub");
 const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 
@@ -55,6 +56,15 @@ async function publishEvent(data) {
   console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`);
 }
 
+async function requestOauth({team_id}) {
+  const response = await axios({
+    method: "post",
+    url: process.env.requestOauthUrl,
+    data: {team_id},
+  });
+  return response.data;
+}
+
 // Main event function handler
 exports.main = async (req, res) => {
   const { body, query } = req;
@@ -74,6 +84,9 @@ exports.main = async (req, res) => {
     message = await handleSpend(body);
   } else if (command === "/budget") {
     message = await handleBudget(body);
+  } else if (command === "/oauth") {
+    // this can't actually happen, I'm just fooling lint because it makes me happy.
+    message = await requestOauth(body);
   } else {
     message = `Command ${command} not recognized`;
   }

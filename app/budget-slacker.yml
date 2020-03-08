@@ -54,6 +54,8 @@ resources:
   properties:
     codeLocation: app/functions/store_oauth
     public: true
+    environmentVariables:
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
 outputs:
 - name: handle-slack-url
   value: $(ref.handle-slack.url)

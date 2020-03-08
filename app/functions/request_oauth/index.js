@@ -1,22 +1,12 @@
 const { google } = require("googleapis");
-const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 
-const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/2";
+const { getSecret } = require("./getSecret");
+
 const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
 const oauthRedirectUri = process.env.storeOauthUrl;
 
-async function getAppCredentials(versionString = CREDENTIALS_SECRET) {
-  const secretsClient = new SecretManagerServiceClient();
-  const secretData = await secretsClient.accessSecretVersion({
-    name: versionString
-  });
-  const secret = secretData[0].payload.data.toString("utf8");
-  const credentials = JSON.parse(secret);
-  return credentials;
-}
-
 // Do this on function initializaion; it doesn't change.
-const credentialsPromise = getAppCredentials();
+const credentialsPromise = getSecret(process.env.appCredentialsSecret);
 
 function getAuthUrl({app_credentials, team_id}) {
   const {client_secret, client_id} = app_credentials;

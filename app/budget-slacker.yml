@@ -31,6 +31,8 @@ resources:
   type: templates/budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/get_team_info
+    environmentVariables:
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
 - name: get-totals
   type: templates/budget_slacker_function.jinja
   properties:
@@ -45,6 +47,7 @@ resources:
     codeLocation: app/functions/request_oauth
     public: true
     environmentVariables:
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
       storeOauthUrl: $(ref.store-oauth.url)
 - name: store-oauth
   type: templates/budget_slacker_function.jinja

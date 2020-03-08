@@ -1,8 +1,8 @@
 const Firestore = require("@google-cloud/firestore");
-const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
+
+const { getSecret } = require("./getSecret");
 
 const COLLECTION_NAME = "budgets";
-const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/2";
 const PROJECTID = process.env.GCP_PROJECT;
 
 const firestore = new Firestore({
@@ -10,18 +10,8 @@ const firestore = new Firestore({
 });
 const collection = firestore.collection(COLLECTION_NAME);
 
-async function getAppCredentials(versionString = CREDENTIALS_SECRET) {
-  const secretsClient = new SecretManagerServiceClient();
-  const secretData = await secretsClient.accessSecretVersion({
-    name: versionString
-  });
-  const secret = secretData[0].payload.data.toString("utf8");
-  const credentials = JSON.parse(secret);
-  return credentials;
-}
-
 // Do this on function initializaion; it doesn't change.
-const credentialsPromise = getAppCredentials();
+const credentialsPromise = getSecret(process.env.appCredentialsSecret);
 
 async function findTeamRecord(team_id) {
   const result = await collection.where(

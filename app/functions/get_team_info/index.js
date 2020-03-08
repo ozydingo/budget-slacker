@@ -2,7 +2,7 @@ const Firestore = require("@google-cloud/firestore");
 const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 
 const COLLECTION_NAME = "budgets";
-const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/1";
+const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/2";
 const PROJECTID = process.env.GCP_PROJECT;
 
 const firestore = new Firestore({
@@ -34,7 +34,10 @@ async function main(req, res) {
   const {team_id} = req.body;
   console.log("Fetching budget info");
   const budget = await findTeamRecord(team_id);
-  if (!budget) { throw Error(`Budget not found for team ${team_id}!`); }
+  if (!budget) {
+    res.status(200).send("null");
+    return;
+  }
 
   const { access_token, refresh_token, spreadsheet_id } = budget.data();
   if (!access_token) { throw Error(`access_token is missing for team ${team_id}!`); }

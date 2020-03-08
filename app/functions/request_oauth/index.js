@@ -1,11 +1,9 @@
 const { google } = require("googleapis");
 const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 
-const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/1";
+const CREDENTIALS_SECRET = "projects/526411321629/secrets/sheets-api-credentials/versions/2";
 const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
 const oauthRedirectUri = process.env.storeOauthUrl;
-
-const { requestOauthBlocks } = require("./responses");
 
 async function getAppCredentials(versionString = CREDENTIALS_SECRET) {
   const secretsClient = new SecretManagerServiceClient();
@@ -35,11 +33,19 @@ function getAuthUrl({app_credentials, team_id}) {
   return authUrl;
 }
 
+function htmlRedirect(url) {
+  return `<html><head><script>window.location.href="${url}";</script></head></html>`;
+}
+
 async function main(req, res) {
-  const { body: { team_id } } = req;
+  console.log("Method:", req.method);
+  console.log("Body:", req.body);
+  console.log("Query:", req.query);
+
+  const { query: { team_id } } = req;
   const app_credentials = await credentialsPromise;
   const oauthUrl = getAuthUrl({app_credentials, team_id});
-  res.status(200).send(requestOauthBlocks({oauthUrl}));
+  res.status(200).send(htmlRedirect(oauthUrl));
 }
 
 module.exports = {

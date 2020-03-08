@@ -2,6 +2,11 @@ imports:
 - path: templates/budget_slacker_function.jinja
 - path: templates/pubsub_topic.jinja
 resources:
+- name: handle-slack-interaction
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/handle_slack_interaction
+    public: true
 - name: slack-pubsub
   type: templates/pubsub_topic.jinja
 - name: handle-slack
@@ -11,7 +16,6 @@ resources:
     public: true
     environmentVariables:
       pubsub_topic: $(ref.slack-pubsub.name)
-      requestOauthUrl: $(ref.request-oauth.url)
 - name: handle-pubsub-message
   type: templates/budget_slacker_function.jinja
   properties:
@@ -22,6 +26,7 @@ resources:
       addExpenseUrl: $(ref.add-expense.url)
       getTeamInfoUrl: $(ref.get-team-info.url)
       getTotalsUrl: $(ref.get-totals.url)
+      requestOauthUrl: $(ref.request-oauth.url)
 - name: get-team-info
   type: templates/budget_slacker_function.jinja
   properties:
@@ -49,7 +54,5 @@ resources:
 outputs:
 - name: handle-slack-url
   value: $(ref.handle-slack.url)
-- name: request-oauth-url
-  value: $(ref.request-oauth.url)
-- name: store-oauth-url
-  value: $(ref.store-oauth.url)
+- name: handle-slack-interaction-url
+  value: $(ref.handle-slack-interaction.url)

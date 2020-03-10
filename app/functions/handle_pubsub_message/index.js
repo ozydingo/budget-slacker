@@ -16,7 +16,7 @@ function messageSlack({response_url, data}) {
 
 function getTeamInfo(team_id) {
   console.log(`Getting team info for ${team_id}`);
-  return invokeFunction(process.env.getTeamInfoUrl, {team_id});
+  return invokeFunction(process.env.teamsUrl, {action: "get", team_id});
 }
 
 async function router({ command, data, response_url }) {

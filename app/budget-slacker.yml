@@ -24,15 +24,13 @@ resources:
       eventTrigger: slack-pubsub
     environmentVariables:
       addExpenseUrl: $(ref.add-expense.url)
-      getTeamInfoUrl: $(ref.get-team-info.url)
+      teamsUrl: $(ref.teams.url)
       getTotalsUrl: $(ref.get-totals.url)
       requestOauthUrl: $(ref.request-oauth.url)
-- name: get-team-info
+- name: teams
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: app/functions/get_team_info
-    environmentVariables:
-      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
+    codeLocation: app/functions/teams
 - name: get-totals
   type: templates/budget_slacker_function.jinja
   properties:

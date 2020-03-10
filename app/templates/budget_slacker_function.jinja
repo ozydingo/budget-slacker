@@ -1,11 +1,14 @@
 {% set location = 'us-east1' %}
 {% set name = env['deployment'] + '-' + env['name'] %}
+
+{% set environmentVariables = properties['environmentVariables'] or {} %}
+{% set function_name = name + "-function" %}
+{% set parent = 'projects/' +  env['project'] + "/locations/" + location %}
+{% set policy_name = name + "-policy" %}
 {% set trigger = properties['trigger'] or {'httpsTrigger': {}} %}
 {% set sourceRepoUrl = 'https://source.developers.google.com/projects/budget-slacker/repos/budget-slacker/moveable-aliases/master/paths/' + properties['codeLocation'] %}
-{% set location = 'projects/' +  env['project'] + "/locations/" + location %}
 
-{% set function_name = name + "-function" %}
-{% set policy_name = name + "-policy" %}
+{% set _ = environmentVariables.update({'deployTimestamp': env['current_time']|string}) %}
 
 resources:
   - name: {{ function_name }}
@@ -14,7 +17,7 @@ resources:
       function: {{ function_name }}
       sourceRepository:
         url: {{ sourceRepoUrl }}
-      parent: {{ location }}
+      parent: {{ parent }}
       timeout: 60s
       runtime: nodejs8
       availableMemoryMb: 256
@@ -27,7 +30,7 @@ resources:
         eventType: providers/cloud.pubsub/eventTypes/topic.publish
       {% endif %}
       environmentVariables:
-        {{ properties['environmentVariables'] or {} }}
+        {{ environmentVariables }}
   - name: {{ name }}-policy
     action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.setIamPolicy
     properties:

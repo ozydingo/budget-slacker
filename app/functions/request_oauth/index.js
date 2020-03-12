@@ -2,7 +2,10 @@ const { google } = require("googleapis");
 
 const { getSecret } = require("./getSecret");
 
-const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
+const SCOPES = [
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/drive.file"
+];
 const oauthRedirectUri = process.env.storeOauthUrl;
 
 // Do this on function initializaion; it doesn't change.
@@ -17,6 +20,7 @@ function getAuthUrl({app_credentials, team_id}) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: "offline",
     scope: SCOPES,
+    prompt: "consent",
     state: JSON.stringify({team_id}),
   });
 

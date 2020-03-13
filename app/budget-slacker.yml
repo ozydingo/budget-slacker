@@ -47,6 +47,17 @@ resources:
     environmentVariables:
       appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
       storeOauthUrl: $(ref.store-oauth.url)
+- name: setup
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/setup
+    environmentVariables:
+      spreadsheetsUrl: $(ref.spreadsheets.url)
+      teamsUrl: $(ref.teams.url)
+- name: spreadsheets
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/spreadsheets
 - name: store-oauth
   type: templates/budget_slacker_function.jinja
   properties:
@@ -54,6 +65,7 @@ resources:
     public: true
     environmentVariables:
       appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
+      setupUrl: $(ref.setup.url)
       teamsUrl: $(ref.teams.url)
 outputs:
 - name: handle-slack-url

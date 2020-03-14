@@ -54,6 +54,7 @@ resources:
     public: true
     environmentVariables:
       appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
+      teamsUrl: $(ref.teams.url)
 outputs:
 - name: handle-slack-url
   value: $(ref.handle-slack.url)

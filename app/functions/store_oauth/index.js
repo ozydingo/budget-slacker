@@ -1,6 +1,7 @@
 const { google } = require("googleapis");
 
 const { getSecret } = require("./getSecret");
+const { invokeFunction } = require("./invoke_function");
 
 // Do this on function initializaion; it doesn't change.
 const credentialsPromise = getSecret(process.env.appCredentialsSecret);
@@ -9,29 +10,33 @@ const credentialsPromise = getSecret(process.env.appCredentialsSecret);
 const redirect_url = "https://us-east1-budget-slacker.cloudfunctions.net/staging-store-oauth-function";
 
 const clientPromise = credentialsPromise.then(credentials => {
-  console.log("Got credentials:", credentials);
   const {client_secret, client_id} = credentials;
   const client = new google.auth.OAuth2(
     client_id, client_secret, redirect_url
   );
-  console.log("Initialized client");
   return client;
 });
 
 async function getToken(code) {
+  console.log("Exchanging code for tokens");
   const client = await(clientPromise);
-  console.log("Exchanging code", code);
   const token = await client.getToken(code);
-  console.log("Got token", token);
   return token;
+}
+
+async function storeTokens(team_id, tokens) {
+  console.log(`Storing tokens for team ${team_id}`);
+  const action = "update";
+  await invokeFunction(process.env.teamsUrl, {action, team_id, tokens});
 }
 
 async function main(req, res) {
   const { code, state } = req.query;
-  console.log({code, state});
+  console.log("Got oauth code with state",  state);
+  const team_id = JSON.parse(state).team_id;
   const tokenResponse = await getToken(code).catch(console.error);
-  console.log(tokenResponse);
-
+  if (!tokenResponse.tokens) { throw new Error("Unable to get tokens. Response:", tokenResponse); }
+  await storeTokens(team_id, tokenResponse.tokens);
   res.status(200).send("ok");
 }
 

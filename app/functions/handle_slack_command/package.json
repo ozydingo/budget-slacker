@@ -1,5 +1,5 @@
 {
-  "name": "handle_slack",
+  "name": "handle_slack_command",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

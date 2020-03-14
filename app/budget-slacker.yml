@@ -9,10 +9,10 @@ resources:
     public: true
 - name: slack-pubsub
   type: templates/pubsub_topic.jinja
-- name: handle-slack
+- name: handle-slack-command
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: app/functions/handle_slack
+    codeLocation: app/functions/handle_slack_command
     public: true
     environmentVariables:
       pubsub_topic: $(ref.slack-pubsub.name)
@@ -68,7 +68,7 @@ resources:
       setupUrl: $(ref.setup.url)
       teamsUrl: $(ref.teams.url)
 outputs:
-- name: handle-slack-url
-  value: $(ref.handle-slack.url)
+- name: handle-slack-command-url
+  value: $(ref.handle-slack-command.url)
 - name: handle-slack-interaction-url
   value: $(ref.handle-slack-interaction.url)

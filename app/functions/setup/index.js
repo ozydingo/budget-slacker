@@ -16,7 +16,7 @@ async function main(req, res) {
       spreadsheet_id,
     }
   );
-  res.status(200).json({ok: true});
+  res.status(200).json({team_id, spreadsheet_id});
 }
 
 module.exports = {

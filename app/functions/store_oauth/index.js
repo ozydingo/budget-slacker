@@ -26,7 +26,7 @@ async function getToken(code) {
 
 async function storeTokens(team_id, tokens) {
   console.log(`Storing tokens for team ${team_id}`);
-  await invokeFunction(process.env.teamsUrl, {
+  return invokeFunction(process.env.teamsUrl, {
     action: "update",
     team_id,
     tokens
@@ -35,11 +35,19 @@ async function storeTokens(team_id, tokens) {
 
 async function setupTeam(team_id, tokens) {
   const app_credentials = await credentialsPromise;
-  await invokeFunction(process.env.setupUrl, {
+  return invokeFunction(process.env.setupUrl, {
     app_credentials,
     team_id,
     tokens
   });
+}
+
+function spreadsheetUrl(spreadsheet_id) {
+  return `https://docs.google.com/spreadsheets/d/${spreadsheet_id}`;
+}
+
+function grantResponse(spreadsheet_id) {
+  return `<html><body>Thanks! You can <a href=${spreadsheetUrl(spreadsheet_id)}>view or edit your budget spreadsheet here</a> at any time. You can now close this window and return to Slack.</body></html>`;
 }
 
 async function main(req, res) {
@@ -50,12 +58,16 @@ async function main(req, res) {
   if (!tokenResponse.tokens) { throw new Error("Unable to get tokens. Response:", tokenResponse); }
   const { tokens } = tokenResponse;
 
-  await Promise.all([
+  const [setupResponse,] = await Promise.all([
     setupTeam(team_id, tokens),
     storeTokens(team_id, tokens),
   ]);
 
-  res.status(200).send("ok");
+  const { spreadsheet_id } = setupResponse;
+  const message = grantResponse(spreadsheet_id);
+
+  res.set("Content-Type", "text/html");
+  res.status(200).send(message);
 }
 
 module.exports = {

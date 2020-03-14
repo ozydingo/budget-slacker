@@ -24,6 +24,7 @@ resources:
       eventTrigger: slack-pubsub
     environmentVariables:
       addExpenseUrl: $(ref.add-expense.url)
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
       teamsUrl: $(ref.teams.url)
       getTotalsUrl: $(ref.get-totals.url)
       requestOauthUrl: $(ref.request-oauth.url)

@@ -1,51 +1,75 @@
 imports:
-- path: templates/cloud_function.py
 - path: templates/budget_slacker_function.jinja
 - path: templates/pubsub_topic.jinja
-- path: functions/add_expense/index.js
-- path: functions/add_expense/package.json
-- path: functions/get_team_info/index.js
-- path: functions/get_team_info/package.json
-- path: functions/get_totals/index.js
-- path: functions/get_totals/package.json
-- path: functions/handle_pubsub_message/index.js
-- path: functions/handle_pubsub_message/invoke_function.js
-- path: functions/handle_pubsub_message/package.json
-- path: functions/handle_pubsub_message/responses.js
-- path: functions/handle_slack/index.js
-- path: functions/handle_slack/package.json
 resources:
-- name: slack-pubsub
-  type: templates/pubsub_topic.jinja
-- name: handle-slack
+- name: handle-slack-interaction
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/handle_slack
+    codeLocation: app/functions/handle_slack_interaction
+    public: true
+- name: slack-pubsub
+  type: templates/pubsub_topic.jinja
+- name: handle-slack-command
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/handle_slack_command
+    public: true
     environmentVariables:
       pubsub_topic: $(ref.slack-pubsub.name)
-    public: true
 - name: handle-pubsub-message
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/handle_pubsub_message
+    codeLocation: app/functions/handle_pubsub_message
     trigger:
       eventTrigger: slack-pubsub
     environmentVariables:
       addExpenseUrl: $(ref.add-expense.url)
-      getTeamInfoUrl: $(ref.get-team-info.url)
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
+      teamsUrl: $(ref.teams.url)
       getTotalsUrl: $(ref.get-totals.url)
-- name: get-team-info
+      requestOauthUrl: $(ref.request-oauth.url)
+- name: teams
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/get_team_info
+    codeLocation: app/functions/teams
 - name: get-totals
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/get_totals
+    codeLocation: app/functions/get_totals
 - name: add-expense
   type: templates/budget_slacker_function.jinja
   properties:
-    codeLocation: functions/add_expense
+    codeLocation: app/functions/add_expense
+- name: request-oauth
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/request_oauth
+    public: true
+    environmentVariables:
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
+      storeOauthUrl: $(ref.store-oauth.url)
+- name: setup
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/setup
+    environmentVariables:
+      spreadsheetsUrl: $(ref.spreadsheets.url)
+      teamsUrl: $(ref.teams.url)
+- name: spreadsheets
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/spreadsheets
+- name: store-oauth
+  type: templates/budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/store_oauth
+    public: true
+    environmentVariables:
+      appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
+      setupUrl: $(ref.setup.url)
+      teamsUrl: $(ref.teams.url)
 outputs:
-- name: handle-slack-url
-  value: $(ref.handle-slack.url)
+- name: handle-slack-command-url
+  value: $(ref.handle-slack-command.url)
+- name: handle-slack-interaction-url
+  value: $(ref.handle-slack-interaction.url)

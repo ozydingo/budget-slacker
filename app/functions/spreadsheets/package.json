@@ -1,16 +1,14 @@
 {
-  "name": "handle_pubsub_message",
+  "name": "setup_spreadsheet",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/secret-manager": "^2.1.0",
-    "axios": "^0.19.2"
+    "googleapis": "^47.0.0"
   }
 }

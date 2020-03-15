@@ -68,12 +68,15 @@ exports.main = async (req, res) => {
     res.status(417).send("Who are you?");
     return;
   }
+  console.log("Token is correct.");
 
   let message;
   if (command === "/spend") {
     message = await handleSpend(body);
   } else if (command === "/budget") {
     message = await handleBudget(body);
+  } else if (command === "/budget-slacker-test-oauth") {
+    message = await handleBudget({response_url:  body.response_url, team_id: "TEST-OAUTH"});
   } else {
     message = `Command ${command} not recognized`;
   }

@@ -1,16 +1,14 @@
 {
-  "name": "get_team_innfo",
+  "name": "setup",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint . ;:",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/firestore": "^2.4.0",
-    "@google-cloud/secret-manager": "^1.2.1"
+    "axios": "^0.19.2"
   }
 }

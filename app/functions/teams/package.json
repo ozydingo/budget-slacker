@@ -1,16 +1,15 @@
 {
-  "name": "handle_pubsub_message",
+  "name": "get_team_innfo",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint .",
+    "lint": "./node_modules/.bin/eslint . ;:",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/secret-manager": "^2.1.0",
-    "axios": "^0.19.2"
+    "@google-cloud/firestore": "^2.6.1"
   }
 }

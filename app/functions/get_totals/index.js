@@ -15,16 +15,21 @@ function sheetClient({app_credentials, tokens}) {
   return sheets;
 }
 
+function parseDollars(value) {
+  if (!value) { return 0; }
+  return Number(value.replace("$", ""));
+}
+
 async function getTotals({sheets, spreadsheet_id}) {
   const result = await sheets.spreadsheets.values.get({
     spreadsheetId: spreadsheet_id,
-    range: `categories!B1:ZZ${HISTORY+1}`,
+    range: `Categories!B1:ZZ${HISTORY+1}`,
     majorDimension: "COLUMNS",
   });
   if (!result.data.values) { return []; }
   const totals = result.data.values.map(array => ({
     category: array[0],
-    values: array.slice(1).map(Number)
+    values: array.slice(1).map(value => parseDollars(value)),
   }));
   return totals;
 }

@@ -1,16 +1,16 @@
 {
-  "name": "handle_pubsub_message",
+  "name": "handle_slack_command",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint .",
+    "lint": "./node_modules/.bin/eslint . ;:",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/secret-manager": "^2.1.0",
-    "axios": "^0.19.2"
+    "@google-cloud/pubsub": "^1.5.0",
+    "@google-cloud/secret-manager": "^1.2.1"
   }
 }

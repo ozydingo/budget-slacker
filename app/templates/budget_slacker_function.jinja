@@ -9,6 +9,7 @@
 {% set sourceRepoUrl = 'https://source.developers.google.com/projects/budget-slacker/repos/budget-slacker/moveable-aliases/master/paths/' + properties['codeLocation'] %}
 
 {% set _ = environmentVariables.update({'deployTimestamp': env['current_time']|string}) %}
+{% set _ = environmentVariables.update({'functionName': function_name}) %}
 
 resources:
   - name: {{ function_name }}

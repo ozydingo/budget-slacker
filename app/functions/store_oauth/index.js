@@ -6,8 +6,8 @@ const { invokeFunction } = require("./invoke_function");
 // Do this on function initializaion; it doesn't change.
 const credentialsPromise = getSecret(process.env.appCredentialsSecret);
 
-// TODO: how to get this since it's self?
-const redirect_url = "https://us-east1-budget-slacker.cloudfunctions.net/staging-store-oauth-function";
+// TODO: get URL from deployment url property instead of constructing it
+const redirect_url = `https://us-east1-budget-slacker.cloudfunctions.net/${process.env.functionName}`;
 
 const clientPromise = credentialsPromise.then(app_credentials => {
   const {client_secret, client_id} = app_credentials;

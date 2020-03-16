@@ -1,4 +1,4 @@
-const { google } = require("googleapis");
+const sheetsClient = require("./sheets_client");
 
 const EXPENSE_RANGE = "expenses!A1:F1";
 
@@ -10,19 +10,6 @@ function epochToDatetime(timestamp) {
   const minute = timestamp.getMinutes();
   const second =  timestamp.getSeconds();
   return  `${month}/${date}/${year} ${hour}:${minute}:${second}`;
-}
-
-function sheetClient({app_credentials, tokens}) {
-  const { client_id, client_secret } = app_credentials;
-
-  const client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-  );
-  client.setCredentials(tokens);
-
-  const sheets = google.sheets({version: "v4", auth: client});
-  return sheets;
 }
 
 async function addExpense({sheets, spreadsheet_id, expense}) {
@@ -47,7 +34,7 @@ async function addExpense({sheets, spreadsheet_id, expense}) {
 
 async function main(req, res) {
   const { app_credentials, tokens, spreadsheet_id, expense } = req.body;
-  const sheets = sheetClient({app_credentials, tokens});
+  const sheets = sheetsClient({app_credentials, tokens});
   await addExpense({sheets, spreadsheet_id, expense});
   res.status(200).send({ok: true});
 }

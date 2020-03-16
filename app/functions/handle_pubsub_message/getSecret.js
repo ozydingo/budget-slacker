@@ -6,10 +6,17 @@ async function getSecret(versionString) {
     name: versionString
   });
   const secret = secretData[0].payload.data.toString("utf8");
-  const credentials = JSON.parse(secret);
-  return credentials;
+  return secret;
+}
+
+async function getJsonSecret(versionString) {
+  const rawSecret = await getSecret(versionString);
+  const secret = JSON.parse(rawSecret);
+  return secret;
+
 }
 
 module.exports = {
+  getJsonSecret,
   getSecret,
 };

@@ -28,6 +28,7 @@ resources:
       teamsUrl: $(ref.teams.url)
       getTotalsUrl: $(ref.get-totals.url)
       requestOauthUrl: $(ref.request-oauth.url)
+      slackTokenSecret: projects/526411321629/secrets/slack-verification-token/versions/1
 - name: teams
   type: budget_slacker_function.jinja
   properties:

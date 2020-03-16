@@ -1,11 +1,12 @@
 const axios = require("axios");
 
-const { getSecret } = require("./getSecret");
+const { getJsonSecret, getSecret } = require("./getSecret");
 const { invokeFunction } = require("./invoke_function.js");
 const responses = require("./responses.js");
 
 // Do this on function initializaion; it doesn't change.
-const credentialsPromise = getSecret(process.env.appCredentialsSecret);
+const credentialsPromise = getJsonSecret(process.env.appCredentialsSecret);
+const slackTokenPromise = getSecret(process.env.slackTokenSecret);
 
 function messageSlack({response_url, data}) {
   console.log("Responding to Slack");
@@ -84,8 +85,15 @@ async function main(pubSubEvent) {
 
   const message = JSON.parse(Buffer.from(pubSubEvent.data, "base64").toString());
   console.log("Got message:", message);
+  const { token, command, data, response_url } = message;
 
-  const { command, data, response_url } = message;
+  const appToken = await slackTokenPromise;
+  if (token !== appToken) {
+    console.log("Incorrect app token:", token);
+    return;
+  }
+  console.log("Token is correct.");
+
   await router(
     { command, data, response_url }
   ).then(response => {

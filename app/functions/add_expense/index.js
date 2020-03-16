@@ -12,7 +12,7 @@ function epochToDatetime(timestamp) {
   return  `${month}/${date}/${year} ${hour}:${minute}:${second}`;
 }
 
-async function addExpense({sheets, spreadsheet_id, expense}) {
+function dataRow(expense) {
   const time = new Date(expense.timestamp);
   const values = [
     epochToDatetime(time),
@@ -22,7 +22,11 @@ async function addExpense({sheets, spreadsheet_id, expense}) {
     expense.category,
     expense.note,
   ];
+  return values;
+}
 
+async function addExpense({sheets, spreadsheet_id, expense}) {
+  const values = dataRow(expense);
   console.log("Appending row with", values);
   return sheets.spreadsheets.values.append({
     spreadsheetId: spreadsheet_id,

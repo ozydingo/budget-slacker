@@ -1,23 +1,23 @@
 imports:
-- path: templates/budget_slacker_function.jinja
-- path: templates/pubsub_topic.jinja
+- path: budget_slacker_function.jinja
+- path: pubsub_topic.jinja
 resources:
 - name: handle-slack-interaction
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/handle_slack_interaction
     public: true
 - name: slack-pubsub
-  type: templates/pubsub_topic.jinja
+  type: pubsub_topic.jinja
 - name: handle-slack-command
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/handle_slack_command
     public: true
     environmentVariables:
       pubsub_topic: $(ref.slack-pubsub.name)
 - name: handle-pubsub-message
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/handle_pubsub_message
     trigger:
@@ -29,19 +29,19 @@ resources:
       getTotalsUrl: $(ref.get-totals.url)
       requestOauthUrl: $(ref.request-oauth.url)
 - name: teams
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/teams
 - name: get-totals
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/get_totals
 - name: add-expense
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/add_expense
 - name: request-oauth
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/request_oauth
     public: true
@@ -49,18 +49,18 @@ resources:
       appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
       storeOauthUrl: $(ref.store-oauth.url)
 - name: setup
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/setup
     environmentVariables:
       spreadsheetsUrl: $(ref.spreadsheets.url)
       teamsUrl: $(ref.teams.url)
 - name: spreadsheets
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/spreadsheets
 - name: store-oauth
-  type: templates/budget_slacker_function.jinja
+  type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/store_oauth
     public: true

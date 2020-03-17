@@ -32,45 +32,62 @@ function getTeamInfo(team_id) {
   return invokeFunction(process.env.teamsUrl, {action: "get", team_id});
 }
 
+function handleInvalidOauth({response_url, team_id}) {
+  const oauthUrl = `${process.env.requestOauthUrl}?team_id=${encodeURIComponent(team_id)}`;
+  const oauthMessage = responses.requestOauthBlocks({oauthUrl});
+  return messageSlack({response_url, data: oauthMessage});
+}
+
+function handlleInvalidSpreadsheet({response_url}) {
+  return messageSlack({response_url, data: responses.invalidSpreadsheetMessage});
+}
+
+async function handelBudget({response_url, teamInfo}) {
+  const { spreadsheet_id, tokens } = teamInfo;
+  const app_credentials = await credentialsPromise;
+  const totals = await invokeFunction(
+    process.env.getTotalsUrl,
+    {app_credentials, spreadsheet_id, tokens}
+  );
+  const message = responses.reportTotals({totals});
+  return messageSlack({response_url, data: message});
+}
+
+async function handleSpend({response_url, teamInfo, expense}) {
+  const { spreadsheet_id, tokens } = teamInfo;
+  const app_credentials = await credentialsPromise;
+  const totals = await invokeFunction(
+    process.env.getTotalsUrl,
+    {app_credentials, spreadsheet_id, tokens}
+  );
+  const message = responses.confirmExpense({totals, expense});
+  return Promise.all([
+    invokeFunction(
+      process.env.addExpenseUrl,
+      {
+        app_credentials,
+        expense,
+        spreadsheet_id,
+        tokens,
+      }
+    ),
+    messageSlack({response_url, data: message}),
+  ]);
+}
+
 async function router({ command, data, response_url }) {
   const teamInfo = await getTeamInfo(data.team_id);
 
   if (!haveValidTokens(teamInfo)) {
-    const oauthUrl = `${process.env.requestOauthUrl}?team_id=${encodeURIComponent(data.team_id)}`;
-    const oauthMessage = responses.requestOauthBlocks({oauthUrl});
-    return messageSlack({response_url, data: oauthMessage});
+    return handleInvalidOauth({response_url, team_id: data.team_id});
   } else if (!haveValidSpreadsheet) {
-    return messageSlack({response_url, data: "Uh oh! I can't find your budget spreadsheet. Please contact support."});
+    return handlleInvalidSpreadsheet({response_url});
   }
 
-  const app_credentials = await credentialsPromise;
-  const { spreadsheet_id, tokens } = teamInfo;
-
   if (command === "budget") {
-    const totals = await invokeFunction(
-      process.env.getTotalsUrl,
-      {app_credentials, spreadsheet_id, tokens}
-    );
-    const message = responses.reportTotals({totals});
-    return messageSlack({response_url, data: message});
+    return handelBudget({response_url, teamInfo});
   } else if (command === "spend") {
-    const totals = await invokeFunction(
-      process.env.getTotalsUrl,
-      {app_credentials, spreadsheet_id, tokens}
-    );
-    const message = responses.confirmExpense({totals, expense: data});
-    return Promise.all([
-      invokeFunction(
-        process.env.addExpenseUrl,
-        {
-          app_credentials,
-          expense: data,
-          spreadsheet_id,
-          tokens,
-        }
-      ),
-      messageSlack({response_url, data: message}),
-    ]);
+    return handleSpend({response_url, teamInfo, expense: data});
   } else {
     return Promise.reject("Unrecognized command " + command);
   }

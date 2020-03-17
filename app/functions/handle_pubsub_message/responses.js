@@ -19,6 +19,10 @@ function confirmExpense({totals, expense}) {
   return {text};
 }
 
+function invalidSpreadsheetMessage() {
+  return "Uh oh! I can't find your budget spreadsheet. Please contact support.";
+}
+
 function requestOauthBlocks({ oauthUrl }) {
   return {
     blocks: [
@@ -60,6 +64,7 @@ function requestOauthBlocks({ oauthUrl }) {
 
 module.exports = {
   confirmExpense,
+  invalidSpreadsheetMessage,
   reportTotals,
   requestOauthBlocks,
 };

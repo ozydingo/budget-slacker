@@ -84,7 +84,7 @@ async function router({ command, data, response_url }) {
     return handlleInvalidSpreadsheet({response_url});
   }
 
-  if (command === "budget") {
+  if (command === "report") {
     return handelBudget({response_url, teamInfo});
   } else if (command === "spend") {
     return handleSpend({response_url, teamInfo, expense: data});

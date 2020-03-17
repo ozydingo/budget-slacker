@@ -11,17 +11,15 @@ function parseSpend(text) {
   return {ok: true, expense: {amount, category, note}};
 }
 
-async function handleBudget(body) {
-  console.log("Handling budget command");
+async function reportSpend(body) {
   const { token, response_url, team_id } = body;
   const data = { team_id };
-  const command = "budget";
+  const command = "report";
   await publishEvent({ token, command, response_url, data });
   return "Crunching the numbers, hang tight!";
 }
 
-async function handleSpend(body) {
-  console.log("Handling spend command");
+async function addExpense(body) {
   const { token, response_url, team_id, text, user_name, user_id } = body;
   const { ok, expense } = parseSpend(text);
   console.log({ ok, expense });
@@ -48,17 +46,12 @@ exports.main = async (req, res) => {
   console.log("Body", body);
   console.log("Query", query);
 
-  const { command } = body;
+  const { text } = body;
   let message;
-  if (command === "/spend") {
-    message = await handleSpend(body);
-  } else if (command === "/budget") {
-    message = await handleBudget(body);
-  } else if (command === "/budget-slacker-test-oauth") {
-    message = await handleBudget({response_url:  body.response_url, team_id: "TEST-OAUTH"});
+  if (/\w/.test(text)) {
+    message = await addExpense(body);
   } else {
-    message = `Command ${command} not recognized`;
+    message = await reportSpend(body);
   }
-
   res.status(200).send(message);
 };

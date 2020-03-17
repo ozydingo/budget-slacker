@@ -1,4 +1,4 @@
-const sheetsClient = require("./sheets_client");
+const { sheetsClient } = require("./sheets_client");
 
 const EXPENSE_RANGE = "expenses!A1:F1";
 

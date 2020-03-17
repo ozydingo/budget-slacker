@@ -1,6 +1,6 @@
 const { google } = require("googleapis");
 
-function sheetClient({app_credentials, tokens}) {
+function sheetsClient({app_credentials, tokens}) {
   const { client_id, client_secret } = app_credentials;
 
   const client = new google.auth.OAuth2(
@@ -14,5 +14,5 @@ function sheetClient({app_credentials, tokens}) {
 }
 
 module.exports = {
-  sheetClient
+  sheetsClient
 };

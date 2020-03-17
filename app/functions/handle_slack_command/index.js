@@ -1,6 +1,5 @@
 const { PubSub } = require("@google-cloud/pubsub");
 
-const PROJECT_ID = process.env.GCP_PROJECT;
 const SPEND_PATTERN = /\$?(\d+(?:\.\d{1,2})?)\s+(?:on\s+)?(.+?)(?:\s*:\s*(.*))$/;
 const PUBSUB_TOPIC = process.env.pubsub_topic;
 
@@ -34,7 +33,7 @@ async function addExpense(body) {
 }
 
 async function publishEvent(data) {
-  const client = new PubSub({projectId: PROJECT_ID});
+  const client = new PubSub({projectId: process.env.GCP_PROJECT});
   const dataBuffer = Buffer.from(JSON.stringify(data));
   const messageId = await client.topic(PUBSUB_TOPIC).publish(dataBuffer);
   console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`);

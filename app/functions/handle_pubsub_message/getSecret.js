@@ -13,7 +13,6 @@ async function getJsonSecret(versionString) {
   const rawSecret = await getSecret(versionString);
   const secret = JSON.parse(rawSecret);
   return secret;
-
 }
 
 module.exports = {

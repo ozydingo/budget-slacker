@@ -75,7 +75,7 @@ async function handleSpend({response_url, teamInfo, expense}) {
   ]);
 }
 
-async function router({ command, data, response_url }) {
+async function router({ action, data, response_url }) {
   const teamInfo = await getTeamInfo(data.team_id);
 
   if (!haveValidTokens(teamInfo)) {
@@ -84,12 +84,12 @@ async function router({ command, data, response_url }) {
     return handlleInvalidSpreadsheet({response_url});
   }
 
-  if (command === "report") {
+  if (action === "report") {
     return handelBudget({response_url, teamInfo});
-  } else if (command === "spend") {
+  } else if (action === "spend") {
     return handleSpend({response_url, teamInfo, expense: data});
   } else {
-    return Promise.reject("Unrecognized command " + command);
+    return Promise.reject("Unrecognized action " + action);
   }
 }
 
@@ -102,7 +102,7 @@ async function main(pubSubEvent) {
 
   const message = JSON.parse(Buffer.from(pubSubEvent.data, "base64").toString());
   console.log("Got message:", message);
-  const { token, command, data, response_url } = message;
+  const { token, action, data, response_url } = message;
 
   const appToken = await slackTokenPromise;
   if (token !== appToken) {
@@ -112,7 +112,7 @@ async function main(pubSubEvent) {
   console.log("Token is correct.");
 
   await router(
-    { command, data, response_url }
+    { action, data, response_url }
   ).then(response => {
     console.log("Response:", response);
   }).catch(err => {

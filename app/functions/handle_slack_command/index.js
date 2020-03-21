@@ -13,8 +13,7 @@ function parseSpend(text) {
 async function reportSpend(body) {
   const { token, response_url, team_id } = body;
   const data = { team_id };
-  const command = "report";
-  await publishEvent({ token, command, response_url, data });
+  await publishEvent({ token, action: "report", response_url, data });
   return "Crunching the numbers, hang tight!";
 }
 
@@ -27,8 +26,7 @@ async function addExpense(body) {
 
   const { amount, category, note } = expense;
   const data = { timestamp, team_id, user_name, user_id, amount, category, note };
-  const command = "spend";
-  await publishEvent({ token, command, response_url, data });
+  await publishEvent({ token, action: "spend", response_url, data });
   return `$${expense.amount} on ${expense.category}, got it!`;
 }
 

@@ -80,7 +80,7 @@ async function router({ action, data, response_url }) {
 
   if (!haveValidTokens(teamInfo)) {
     return handleInvalidOauth({response_url, team_id: data.team_id});
-  } else if (!haveValidSpreadsheet) {
+  } else if (!haveValidSpreadsheet(teamInfo)) {
     return handlleInvalidSpreadsheet({response_url});
   }
 

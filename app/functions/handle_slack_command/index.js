@@ -39,18 +39,21 @@ async function publishEvent(data) {
   console.log(`Published message id ${messageId} to ${PUBSUB_TOPIC}`);
 }
 
+function commandHasData(text) {
+  return /\w/.test(text);
+}
+
 // Main event function handler
 exports.main = async (req, res) => {
   const { body, query } = req;
   console.log("Body", body);
   console.log("Query", query);
 
-  const { text } = body;
-  let message;
-  if (/\w/.test(text)) {
-    message = await addExpense(body);
+  if (commandHasData(body.text)) {
+    const message = await addExpense(body);
+    res.status(200).send(message);
   } else {
-    message = await reportSpend(body);
+    const message = await reportSpend(body);
+    res.status(200).send(message);
   }
-  res.status(200).send(message);
 };

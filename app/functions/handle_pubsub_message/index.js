@@ -42,7 +42,7 @@ function handlleInvalidSpreadsheet({response_url}) {
   return messageSlack({response_url, data: responses.invalidSpreadsheetMessage});
 }
 
-async function handelBudget({response_url, teamInfo}) {
+async function handleReport({response_url, teamInfo}) {
   const { spreadsheet_id, tokens } = teamInfo;
   const app_credentials = await credentialsPromise;
   const totals = await invokeFunction(
@@ -53,7 +53,7 @@ async function handelBudget({response_url, teamInfo}) {
   return messageSlack({response_url, data: message});
 }
 
-async function handleSpend({response_url, teamInfo, expense}) {
+async function handleExpense({response_url, teamInfo, expense}) {
   const { spreadsheet_id, tokens } = teamInfo;
   const app_credentials = await credentialsPromise;
   const totals = await invokeFunction(
@@ -85,9 +85,9 @@ async function router({ action, data, response_url }) {
   }
 
   if (action === "report") {
-    return handelBudget({response_url, teamInfo});
+    return handleReport({response_url, teamInfo});
   } else if (action === "spend") {
-    return handleSpend({response_url, teamInfo, expense: data});
+    return handleExpense({response_url, teamInfo, expense: data});
   } else {
     return Promise.reject("Unrecognized action " + action);
   }

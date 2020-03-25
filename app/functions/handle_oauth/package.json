@@ -1,5 +1,5 @@
 {
-  "name": "store_oauth",
+  "name": "handle_oauth",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

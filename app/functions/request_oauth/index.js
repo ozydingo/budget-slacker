@@ -6,7 +6,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/drive.readonly",
   "https://www.googleapis.com/auth/drive.file"
 ];
-const oauthRedirectUri = process.env.storeOauthUrl;
+const oauthRedirectUri = process.env.handleOauthUrl;
 
 // Do this on function initializaion; it doesn't change.
 const credentialsPromise = getSecret(process.env.appCredentialsSecret);

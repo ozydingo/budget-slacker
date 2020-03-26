@@ -17,7 +17,29 @@ const clientPromise = credentialsPromise.then(app_credentials => {
   return client;
 });
 
-async function getToken(code) {
+async function getTokens({ code, state }) {
+  const { team_id, oauth_nonce } = JSON.parse(state);
+  const [ teamInfo, tokenResponse ] = await Promise.all([
+    getTeamInfo(team_id).catch(console.error),
+    exchangeCodeForToken(code).catch(console.error),
+  ]);
+  if (!teamInfo.oauth_nonce_expiration || !teamInfo.oauth_nonce) {
+    throw new Error("Team is not in a valid state for OAuth.");
+  }
+  if (new Date(teamInfo.oauth_nonce_expiration) < new Date()) {
+    throw new Error("OAuth state token has expired.");
+  }
+  if (teamInfo.oauth_nonce !== oauth_nonce) {
+    throw new Error("OAuth state token mismatch.");
+  }
+  if (!tokenResponse.tokens) {
+    throw new Error("Unable to get tokens. Response:", tokenResponse);
+  }
+  const { tokens } = tokenResponse;
+  return tokens;
+}
+
+async function exchangeCodeForToken(code) {
   console.log("Exchanging code for tokens");
   const client = await(clientPromise);
   const token = await client.getToken(code);
@@ -31,6 +53,10 @@ async function storeTokens(team_id, tokens) {
     team_id,
     tokens
   });
+}
+
+async function getTeamInfo(team_id) {
+  return invokeFunction(process.env.teamsUrl, {action: "get", team_id});
 }
 
 async function setupTeam(team_id, tokens) {
@@ -53,10 +79,8 @@ function grantResponse(spreadsheet_id) {
 async function main(req, res) {
   const { code, state } = req.query;
   console.log("Got oauth code with state",  state);
-  const team_id = JSON.parse(state).team_id;
-  const tokenResponse = await getToken(code).catch(console.error);
-  if (!tokenResponse.tokens) { throw new Error("Unable to get tokens. Response:", tokenResponse); }
-  const { tokens } = tokenResponse;
+  const { team_id } = JSON.parse(state);
+  const tokens = await getTokens({code, state});
 
   const [setupResponse,] = await Promise.all([
     setupTeam(team_id, tokens),

@@ -34,6 +34,8 @@ async function update(team_id, attrs) {
 
 function attrs_for_update(attrs) {
   const return_attrs = {};
+  if (attrs.oauth_nonce !== undefined) { return_attrs.oauth_nonce = attrs.oauth_nonce; }
+  if (attrs.oauth_nonce_expiration !== undefined) { return_attrs.oauth_nonce_expiration = attrs.oauth_nonce_expiration; }
   if (attrs.tokens !== undefined) { return_attrs.tokens = attrs.tokens; }
   if (attrs.spreadsheet_id !== undefined) { return_attrs.spreadsheet_id = attrs.spreadsheet_id; }
   return return_attrs;

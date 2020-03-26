@@ -11,7 +11,7 @@ const oauthRedirectUri = process.env.handleOauthUrl;
 // Do this on function initializaion; it doesn't change.
 const credentialsPromise = getSecret(process.env.appCredentialsSecret);
 
-function getAuthUrl({app_credentials, team_id}) {
+function getAuthUrl({app_credentials, state}) {
   const {client_secret, client_id} = app_credentials;
   const oAuth2Client = new google.auth.OAuth2(
     client_id, client_secret, oauthRedirectUri
@@ -21,7 +21,7 @@ function getAuthUrl({app_credentials, team_id}) {
     access_type: "offline",
     scope: SCOPES,
     prompt: "consent",
-    state: JSON.stringify({team_id}),
+    state,
   });
 
   return authUrl;
@@ -36,9 +36,9 @@ async function main(req, res) {
   console.log("Body:", req.body);
   console.log("Query:", req.query);
 
-  const { query: { team_id } } = req;
+  const { query: { state } } = req;
   const app_credentials = await credentialsPromise;
-  const oauthUrl = getAuthUrl({app_credentials, team_id});
+  const oauthUrl = getAuthUrl({app_credentials, state});
   res.status(200).send(htmlRedirect(oauthUrl));
 }
 

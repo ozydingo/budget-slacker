@@ -8,8 +8,22 @@ async function get(req, res) {
 }
 
 async function update(req, res) {
-  const { team_id, tokens, spreadsheet_id } = req.body;
-  await teams.update(team_id, {tokens, spreadsheet_id});
+  const {
+    team_id,
+    oauth_nonce,
+    oauth_nonce_expiration,
+    tokens,
+    spreadsheet_id
+  } = req.body;
+  await teams.update(
+    team_id,
+    {
+      oauth_nonce,
+      oauth_nonce_expiration,
+      tokens,
+      spreadsheet_id
+    }
+  );
   res.status(200).json({ok: true});
 }
 

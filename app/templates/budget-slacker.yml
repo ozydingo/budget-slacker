@@ -26,6 +26,7 @@ resources:
       addExpenseUrl: $(ref.add-expense.url)
       appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
       teamsUrl: $(ref.teams.url)
+      initiateOauthUrl: $(ref.initiate-oauth.url)
       getTotalsUrl: $(ref.get-totals.url)
       requestOauthUrl: $(ref.request-oauth.url)
       slackTokenSecret: projects/526411321629/secrets/slack-verification-token/versions/1
@@ -41,6 +42,14 @@ resources:
   type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/add_expense
+- name: initiate-oauth
+  type: budget_slacker_function.jinja
+  properties:
+    codeLocation: app/functions/initiate_oauth
+    public: true
+    environmentVariables:
+      requestOauthUrl: $(ref.request-oauth.url)
+      teamsUrl: $(ref.teams.url)
 - name: request-oauth
   type: budget_slacker_function.jinja
   properties:

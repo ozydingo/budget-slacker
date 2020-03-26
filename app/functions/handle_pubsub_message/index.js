@@ -1,6 +1,4 @@
 const axios = require("axios");
-const crypto = require("crypto");
-const querystring = require("querystring");
 
 const { getJsonSecret, getSecret } = require("./getSecret");
 const { invokeFunction } = require("./invoke_function.js");
@@ -34,29 +32,8 @@ function getTeamInfo(team_id) {
   return invokeFunction(process.env.teamsUrl, {action: "get", team_id});
 }
 
-function generatePerishableToken(bytes = 64) {
-  return crypto.randomBytes(bytes).toString("hex");
-}
-
-function generateExpirationTime(minutes = 15) {
-  return (new Date()).getTime() + minutes * 60 * 1000;
-}
-
 async function handleInvalidOauth({response_url, team_id}) {
-  const oauth_nonce = generatePerishableToken();
-  const oauth_nonce_expiration = generateExpirationTime();
-  await invokeFunction(process.env.teamsUrl, {
-    action: "update",
-    team_id,
-    oauth_nonce,
-    oauth_nonce_expiration,
-  });
-
-  const state = JSON.stringify({team_id, oauth_nonce});
-  const query = querystring.stringify({state});
-  const oauthUrl = `${process.env.requestOauthUrl}?${query}`;
-  const oauthMessage = responses.requestOauthBlocks({oauthUrl});
-  return messageSlack({response_url, data: oauthMessage});
+  return invokeFunction(process.env.initiateOauthUrl, {response_url, team_id});
 }
 
 function handlleInvalidSpreadsheet({response_url}) {

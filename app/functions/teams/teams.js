@@ -29,10 +29,10 @@ async function find_or_create(team_id, attrs = {}) {
 
 async function update(team_id, attrs) {
   const team = await(find_or_create(team_id));
-  return collection.doc(team.id).update(safe_attrs(attrs));
+  return collection.doc(team.id).update(attrs_for_update(attrs));
 }
 
-function safe_attrs(attrs) {
+function attrs_for_update(attrs) {
   const return_attrs = {};
   if (attrs.tokens !== undefined) { return_attrs.tokens = attrs.tokens; }
   if (attrs.spreadsheet_id !== undefined) { return_attrs.spreadsheet_id = attrs.spreadsheet_id; }

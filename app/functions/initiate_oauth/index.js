@@ -1,20 +1,20 @@
 const axios = require("axios");
 const crypto = require("crypto");
-// const { google } = require("googleapis");
+const { google } = require("googleapis");
 const querystring = require("querystring");
 
-// const { getSecret } = require("./getSecret");
+const { getSecret } = require("./getSecret");
 const { invokeFunction } = require("./invoke_function.js");
 const responses = require("./responses.js");
 
-// const SCOPES = [
-//   "https://www.googleapis.com/auth/drive.readonly",
-//   "https://www.googleapis.com/auth/drive.file"
-// ];
-// const oauthRedirectUri = process.env.handleOauthUrl;
+const SCOPES = [
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/drive.file"
+];
+const oauthRedirectUri = process.env.handleOauthUrl;
 
 // Do this on function initializaion; it doesn't change.
-// const credentialsPromise = getSecret(process.env.appCredentialsSecret);
+const credentialsPromise = getSecret(process.env.appCredentialsSecret);
 
 function messageSlack({response_url, data}) {
   console.log("Responding to Slack");
@@ -27,21 +27,21 @@ function messageSlack({response_url, data}) {
   });
 }
 
-// function getAuthUrl({app_credentials, state}) {
-//   const {client_secret, client_id} = app_credentials;
-//   const oAuth2Client = new google.auth.OAuth2(
-//     client_id, client_secret, oauthRedirectUri
-//   );
-//
-//   const authUrl = oAuth2Client.generateAuthUrl({
-//     access_type: "offline",
-//     scope: SCOPES,
-//     prompt: "consent",
-//     state,
-//   });
-//
-//   return authUrl;
-// }
+function getAuthUrl({app_credentials, state}) {
+  const {client_secret, client_id} = app_credentials;
+  const oAuth2Client = new google.auth.OAuth2(
+    client_id, client_secret, oauthRedirectUri
+  );
+
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: SCOPES,
+    prompt: "consent",
+    state,
+  });
+
+  return authUrl;
+}
 
 function generatePerishableToken(bytes = 64) {
   return crypto.randomBytes(bytes).toString("hex");
@@ -66,13 +66,13 @@ async function main(req, res) {
   const state = JSON.stringify({team_id, oauth_nonce});
   console.log("OAuth request state:", state);
 
-  // const app_credentials = await credentialsPromise;
-  // const oauthUrl = getAuthUrl({app_credentials, state});
-
-  const query = querystring.stringify({state});
-  const oauthUrl = `${process.env.requestOauthUrl}?${query}`;
+  const app_credentials = await credentialsPromise;
+  const url = getAuthUrl({app_credentials, state});
+  const query = querystring.stringify({url});
+  const redirectUrl = `${process.env.requestOauthUrl}?${query}`;
+  console.log("OAuth initiation URL:", process.env.requestOauthUrl);
   console.log("OAuth initiation query:", query);
-  const oauthMessage = responses.requestOauthBlocks({oauthUrl});
+  const oauthMessage = responses.requestOauthBlocks({oauthUrl: redirectUrl});
   await messageSlack({response_url, data: oauthMessage});
   res.status(200).send("");
 }

@@ -9,6 +9,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.2"
+    "@google-cloud/secret-manager": "^2.1.0",
+    "axios": "^0.19.2",
+    "googleapis": "^48.0.0"
   }
 }

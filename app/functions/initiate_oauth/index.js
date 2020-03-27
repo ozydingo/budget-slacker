@@ -1,7 +1,6 @@
 const axios = require("axios");
 const crypto = require("crypto");
 const { google } = require("googleapis");
-const querystring = require("querystring");
 
 const { getSecret } = require("./getSecret");
 const { invokeFunction } = require("./invoke_function.js");
@@ -68,11 +67,8 @@ async function main(req, res) {
 
   const app_credentials = await credentialsPromise;
   const url = getAuthUrl({app_credentials, state});
-  const query = querystring.stringify({url});
-  const redirectUrl = `${process.env.requestOauthUrl}?${query}`;
-  console.log("OAuth initiation URL:", process.env.requestOauthUrl);
-  console.log("OAuth initiation query:", query);
-  const oauthMessage = responses.requestOauthBlocks({oauthUrl: redirectUrl});
+  console.log("Grant action URL:", url);
+  const oauthMessage = responses.requestOauthBlocks({oauthUrl: url});
   await messageSlack({response_url, data: oauthMessage});
   res.status(200).send("");
 }

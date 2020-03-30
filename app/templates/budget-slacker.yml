@@ -45,7 +45,6 @@ resources:
   type: budget_slacker_function.jinja
   properties:
     codeLocation: app/functions/initiate_oauth
-    public: true
     environmentVariables:
       appCredentialsSecret: projects/526411321629/secrets/sheets-api-credentials/versions/2
       handleOauthUrl: $(ref.handle-oauth.url)

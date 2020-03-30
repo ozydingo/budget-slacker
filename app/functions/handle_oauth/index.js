@@ -17,12 +17,10 @@ const clientPromise = credentialsPromise.then(app_credentials => {
   return client;
 });
 
-async function getTokens({ code, state }) {
+async function verifyOauthRequest({ state }) {
   const { team_id, oauth_nonce } = JSON.parse(state);
-  const [ teamInfo, tokenResponse ] = await Promise.all([
-    getTeamInfo(team_id).catch(console.error),
-    exchangeCodeForToken(code).catch(console.error),
-  ]);
+  const teamInfo = await getTeamInfo(team_id);
+
   if (!teamInfo.oauth_nonce_expiration || !teamInfo.oauth_nonce) {
     throw new Error("Team is not in a valid state for OAuth.");
   }
@@ -32,9 +30,14 @@ async function getTokens({ code, state }) {
   if (teamInfo.oauth_nonce !== oauth_nonce) {
     throw new Error("OAuth state token mismatch.");
   }
+}
+
+async function getTokens({ code }) {
+  const tokenResponse = await exchangeCodeForToken(code);
   if (!tokenResponse.tokens) {
     throw new Error("Unable to get tokens. Response:", tokenResponse);
   }
+
   const { tokens } = tokenResponse;
   return tokens;
 }
@@ -51,7 +54,8 @@ async function storeTokens(team_id, tokens) {
   return invokeFunction(process.env.teamsUrl, {
     action: "update",
     team_id,
-    tokens
+    tokens,
+    oauth_nonce: null,
   });
 }
 
@@ -80,7 +84,10 @@ async function main(req, res) {
   const { code, state } = req.query;
   console.log("Got oauth code with state",  state);
   const { team_id } = JSON.parse(state);
-  const tokens = await getTokens({code, state});
+  const [,tokens] = await Promise.all([
+    verifyOauthRequest({state}),
+    getTokens({code})
+  ]);
 
   const [setupResponse,] = await Promise.all([
     setupTeam(team_id, tokens),
